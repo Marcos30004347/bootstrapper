@@ -1,0 +1,233 @@
+---
+# - name: Install containerd binaries
+#   apt: 
+#     name: "{{ packages }}"
+#     state: present
+#     update_cache: yes
+#   vars:
+#     packages:
+#       - containerd
+
+
+- name: Downloading containerd
+  get_url: url=https://github.com/containerd/containerd/releases/download/v1.2.1/containerd-1.2.1.linux-amd64.tar.gz dest=/usr/local/
+
+- name: Extract containerd-1.2.1.linux-amd64.tar.gz /usr/local/
+  ansible.builtin.unarchive:
+    src: /usr/local/containerd-1.2.1.linux-amd64.tar.gz
+    dest: /usr/local/
+    copy: no
+
+- name: Downloading critols
+  get_url: url=https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.20.0/crictl-v1.20.0-linux-amd64.tar.gz dest=/usr/local/
+
+- name: Extract critols /usr/local/bin
+  unarchive:
+    src: /usr/local/crictl-v1.20.0-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    copy: no
+
+- name: Downloading containerd
+  get_url: url=https://github.com/opencontainers/runc/releases/download/v1.0.0-rc6/runc.amd64 dest=/usr/local/sbin/runc
+
+- name: Changing perm of "/usr/local/sbin/runc", adding "+x"
+  file: dest=/usr/local/sbin/runc mode=a+x
+
+- name: Downloading containerd.service
+  get_url: url=https://raw.githubusercontent.com/containerd/cri/master/contrib/systemd-units/containerd.service dest=/etc/systemd/system/containerd.service
+
+- name: Enable and start containerd
+  shell: "{{ item }}"
+  with_items:
+    - "systemctl daemon-reload"
+    - "systemctl enable containerd.service"
+    - "systemctl start containerd.service"
+  become: true
+
+- name: Configure /etc/crictl.yaml
+  lineinfile:
+    path: /etc/crictl.yaml
+    line: "runtime-endpoint: unix:///run/containerd/containerd.sock"
+    create: yes
+  become: true
+
+- name: Configure /etc/systemd/system/kubelet.service.d/0-containerd.conf
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/0-containerd.conf
+    line: "KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
+    create: yes
+  become: true
+
+- name: System reload
+  shell: "{{ item }}"
+  with_items:
+    - "systemctl daemon-reload"
+  become: true
+
+- name: Add overlay to /etc/modules-load.d/containerd.conf
+  lineinfile:
+    path: /etc/modules-load.d/containerd.conf
+    line: 'overlay'
+    create: yes
+  become: true
+
+- name: Add br_netfilter to /etc/modules-load.d/containerd.conf
+  lineinfile:
+    path: /etc/modules-load.d/containerd.conf
+    line: 'br_netfilter'
+    create: yes
+  become: true
+    
+- modprobe:
+    name: overlay
+    state: present
+
+- modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Reload sysctl config
+  shell: "{{ item }}"
+  with_items:    
+    - sysctl --system
+
+- name: Add net.ipv4.ip_forward = 1 to /etc/sysctl.d/99-kubernetes-cri.conf
+  lineinfile:
+    path: /etc/sysctl.d/99-kubernetes-cri.conf
+    line: 'net.ipv4.ip_forward = 1'
+    create: yes
+  become: true
+
+- name: Add net.bridge.bridge-nf-call-ip6tables = 1 to /etc/sysctl.d/99-kubernetes-cri.conf
+  lineinfile:
+    path: /etc/sysctl.d/99-kubernetes-cri.conf
+    line: 'net.bridge.bridge-nf-call-ip6tables = 1'
+    create: yes
+  become: true
+
+- name: Add net.bridge.bridge-nf-call-ip6tables = 1 to /etc/sysctl.d/99-kubernetes-cri.conf
+  lineinfile:
+    path: /etc/crictl.yaml
+    line: 'runtime-endpoint: unix:///run/containerd/containerd.sock'
+    create: yes
+  become: true
+
+
+- name: Reload sysctl config
+  shell: "{{ item }}"
+  with_items:    
+    - sysctl --system
+
+- name: Install packages that allow apt to be used over HTTPS
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+- name: Add apt repository for stable version
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ linux_distro }} stable
+    state: present
+
+- name: Install packages that allow apt to be used over HTTPS
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - containerd
+
+- name: Create /etc/containerd
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: '0755'
+
+- name: Config containerd
+  shell: "{{ item }}"
+  with_items:    
+    - containerd config default | tee /etc/containerd/config.toml
+  become: true
+
+- name: Restart containerd
+  shell: "{{ item }}"
+  with_items:    
+    - systemctl restart containerd
+  become: true
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Add an apt signing key for Kubernetes
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Adding apt repository for Kubernetes
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: kubernetes.list
+
+- name: Install Kubernetes binaries
+  apt: 
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - kubelet 
+      - kubeadm 
+      - kubectl
+
+- name: Configure node ip
+  lineinfile:
+    path: /etc/default/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+    create: yes
+
+- name: Restart kubelet
+  service:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+  
+- name: Start kubelet
+  service:
+    name: kubelet
+    daemon_reload: yes
+    enabled: true
+  
+- name: Switch Docker container runtime to containerd
+  shell: "{{ item }}"
+  with_items:
+    - "systemctl daemon-reload"
+    - "systemctl enable kubelet"
+    - "systemctl enable containerd"
+    - "systemctl restart containerd"
+    - "systemctl daemon-reload"
+    - "systemctl restart kubelet"

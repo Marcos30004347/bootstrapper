@@ -1,7 +1,8 @@
 .vagrant/
 .vscode/
-ubuntu-xenial-16.04-cloudimg-console.log
 join-command
 scripts/
 playbooks/
 _/
+__/
+*.log

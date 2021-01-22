@@ -31,11 +31,13 @@ Vagrant.configure(VAGRANT_FILE_VERSION) do |config|
         master.vm.hostname = "k8s-master"
 
         master.vm.provision "ansible", run: 'always' do |ansible|
-            ansible.playbook = "ansible/development/k8s-master.playbook.yml"
+            ansible.playbook = "ansible/k8s-master.playbook.yml"
             ansible.ask_become_pass = true
             ansible.extra_vars = {
                 node_ip: "192.168.50.10",
                 linux_distro: "xenial",
+                home_dir: "/home/vagrant",
+                pod_network_cidr: "192.168.0.0/16"
             }
         end
     end
@@ -44,22 +46,23 @@ Vagrant.configure(VAGRANT_FILE_VERSION) do |config|
     #########################################
     ###### Define the Kubernetes Nodes ######
     #########################################
-    (1..KUBERNETES_NODES_COUNT).each do |i|
-        config.vm.define "k8s-node-#{i}" do |node|
-            node.vm.box = "ubuntu/xenial64"
+    # (1..KUBERNETES_NODES_COUNT).each do |i|
+    #     config.vm.define "k8s-node-#{i}" do |node|
+    #         node.vm.box = "ubuntu/xenial64"
     
-            # can be acesseb both by the ip than by the http://k8-node-#{i}
-            node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
-            node.vm.hostname = "k8s-node-#{i}"
+    #         # can be acesseb both by the ip than by the http://k8-node-#{i}
+    #         node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
+    #         node.vm.hostname = "k8s-node-#{i}"
             
-            node.vm.provision "ansible", run: 'always' do |ansible|
-                ansible.playbook = "ansible/development/k8s-node.playbook.yml"
-                ansible.ask_become_pass = true
-                ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10}",
-                    linux_distro: "xenial",
-                }
-            end
-        end
-    end
+    #         node.vm.provision "ansible", run: 'always' do |ansible|
+    #             ansible.playbook = "ansible/k8s-node.playbook.yml"
+    #             ansible.ask_become_pass = true
+    #             ansible.extra_vars = {
+    #                 node_ip: "192.168.50.#{i + 10}",
+    #                 linux_distro: "xenial",
+    #                 home_dir: "/home/vagrant",
+    #             }
+    #         end
+    #     end
+    # end
 end
