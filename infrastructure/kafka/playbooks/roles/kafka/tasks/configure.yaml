@@ -1,0 +1,61 @@
+---
+- name: Creating data directory
+  file:
+    path: "{{ kafka_data_store }}"
+    state: directory
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: Creating data directory
+  file:
+    path: "{{ kafka_log_dir }}"
+    state: directory
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: Updating Configuration File in kafka.
+  template:
+    src: "{{ item }}"
+    dest: "/opt/kafka/config/{{ item }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+  with_items:
+    - "server.properties"
+    - "log4j.properties"
+
+- name: Creating a directory for kafka
+  file:
+    path: "{{ kafka_data_store }}/{{ item }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    state: directory
+  with_items:
+    - "{{ kafka_broker_id }}"
+
+- name: Template Kafka systemd service file
+  template:
+    src: kafka.service
+    dest: /usr/lib/systemd/system/kafka.service
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+  notify:
+    - Restart Kafka service
+
+- name: "Render and write out kafka user env file"
+  template:
+    src:  kafka.j2
+    dest: "/etc/default/kafka"
+    mode: 0644
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: "Reload systemctl daemon"
+  command: systemctl daemon-reload
+  
+- name: Start the Kafka service
+  systemd:
+    name: kafka.service
+    state: started
+    enabled: yes
+  tags:
+    - kafka_service

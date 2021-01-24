@@ -1,0 +1,34 @@
+# [Unit]
+# Description=Kafka Daemon
+# After=zookeeper.service
+
+# [Service]
+# Type=forking
+# User={{ kafka_user }}
+# Group={{ kafka_group }}
+# EnvironmentFile=/etc/default/kafka
+# LimitNOFILE={{ kafka_nofiles_limit }}
+# Restart=on-failure
+# ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+
+# [Install]
+# WantedBy=multi-user.target
+# Alias=kafka.service
+
+
+[Unit]
+Description=Apache Kafka server (broker)
+Documentation=http://kafka.apache.org/documentation.html
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User={{ kafka_user }}
+Group={{ kafka_group }}
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+ExecStop=/opt/kafka/bin/kafka-server-stop.sh
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,22 @@
+---
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: 'kubeadm init --cri-socket /run/containerd/containerd.sock --apiserver-advertise-address={{ node_ip }} --apiserver-cert-extra-sans={{ node_ip }} --node-name k8s-master --pod-network-cidr={{ pod_network_cidr }}'
+
+- name: Setup kubeconfig for vagrant user
+  command: "{{ item }}"
+  args:
+    warn: false 
+  with_items:
+    - mkdir -p {{ home_dir }}/.kube
+    - cp -i /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
+    - chown vagrant:vagrant {{ home_dir }}/.kube/config
+- name: Install weave pod network
+  become: false
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+
+- name: Copy join command to local file
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"

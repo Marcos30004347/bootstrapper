@@ -1,0 +1,7 @@
+---
+kafka_port: 9092
+kafka_log4j_rootlogger: INFO
+kafka_nofiles_limit: 50000
+kafka_heap_opts: "-Xmx1G -Xms1G"
+kafka_environment: {}
+kafka_log_dir: /var/log/kafka

@@ -1,0 +1,21 @@
+---
+- name: start kafka
+  service:
+    name: kafka
+    state: started
+
+- name: stop kafka
+  service:
+    name: kafka
+    state: stopped
+
+- name: restart kafka
+  service:
+    name: kafka
+    state: restarted
+
+- name: Restart Kafka service
+  systemd:
+    name: zookeeper.service
+    state: restarted
+    daemon_reload: yes

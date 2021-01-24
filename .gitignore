@@ -2,7 +2,9 @@
 .vscode/
 join-command
 scripts/
-playbooks/
 _/
 __/
 *.log
+ansible/
+aaaa
+ignore/

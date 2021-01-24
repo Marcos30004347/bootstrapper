@@ -1,0 +1,42 @@
+---
+- name: Create a User `"{{ kafka_user }}"`.
+  user:
+    name: "{{ kafka_user }}"
+    password: "{{ kafka_password }}"
+
+- name: Install OpenJDK
+  apt:
+    name: "openjdk-8-jre"
+
+- name: Exporting JAVA_HOME
+  shell: export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+
+- name: Download kafka
+  get_url:
+    url: "https://downloads.apache.org/kafka/2.7.0/kafka_2.13-2.7.0.tgz"
+    dest: "/tmp/kafka_2.13-2.7.0.tgz"
+    validate_certs: no
+  
+- name: Extract kafka
+  unarchive:
+    src: /tmp/kafka_2.13-2.7.0.tgz
+    creates: /usr/local/kafka_2.13-2.7.0
+    dest: /usr/local
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    copy: no
+
+- name: Change Directory Permissions.
+  file:
+    path: "/usr/local/kafka_2.13-2.7.0"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    recurse: yes
+  
+- name: Creating a Symbolic Link in /usr/local/kafka.
+  file:
+    src: "/usr/local/kafka_2.13-2.7.0"
+    path: "/opt/kafka"
+    state: link
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"

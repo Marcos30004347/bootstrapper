@@ -1,0 +1,5 @@
+---
+- include: intall.yaml
+- include: configure.yaml
+# - include: start.yaml
+# - include: topics.yaml

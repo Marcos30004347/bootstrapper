@@ -1,0 +1,43 @@
+# --------------------------------------
+# USERs
+# --------------------------------------
+
+# --------------------------------------
+# COMMON FOR INSTALL PATH
+# --------------------------------------
+
+# Common Location information.
+# common:
+#  install_base_path: /usr/local
+#  soft_link_base_path: /opt
+
+#----------------------------------
+#  JAVA Variables
+#----------------------------------
+java_home: /usr/local/java/jdk
+
+# --------------------------------------
+# KAFKA VARIABLES
+# --------------------------------------
+
+kafka_user: kafkaadmin
+kafka_group: kafkaadmin
+kafka_password: $6$rounds=40000$1qjG/hovLZOkcerH$CK4Or3w8rR3KabccowciZZUeD.nIwR/VINUa2uPsmGK/2xnmOt80TjDwbof9rNvnYY6icCkdAR2qrFquirBtT1
+
+kafka_version: kafka_2.9.2-0.8.2.1
+
+# Data Storage path on Destination kafka Nodes.
+kafka_data_store: /etc/data/kafka
+
+zookeeper_connect:
+  - 172.31.12.110
+
+# --------------------------------------
+# ZK VARIABLES
+# --------------------------------------
+zookeeper_user: zkadmin
+zookeeper_group: zkadmin
+zookeeper_password: $6$rounds=40000$1qjG/hovLZOkcerH$CK4Or3w8rR3KabccowciZZUeD.nIwR/VINUa2uPsmGK/2xnmOt80TjDwbof9rNvnYY6icCkdAR2qrFquirBtT1
+
+zookeeper_data_store: /tmp/data/zookeeper
+zookeeper_logging: /tmp/data/zookeeper_logging

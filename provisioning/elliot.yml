@@ -1,0 +1,11 @@
+---
+- hosts: k8smasters
+  become: true
+  roles:
+    - role: 'infrastructure/zookeeper/playbooks/roles/zookeeper'
+    - role: 'infrastructure/kafka/playbooks/roles/kafka'
+    - role: 'infrastructure/kafka/playbooks/roles/kafka-topic'
+      vars:
+        kafka_topics: [ teste, testando ]
+    # - role: 'infrastructure/kubernetes/deploy/roles/kubernetes-install'
+    # - role: 'infrastructure/kubernetes/deploy/roles/kubernetes-master'
