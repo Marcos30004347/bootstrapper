@@ -1,4 +1,41 @@
 ---
+
+- name: Create keystore dir if mTLS is enabled
+  file:
+    path: '{{kafka_keystore_dir}}'
+    state: directory
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
+  when: kafka_mTLS | bool
+
+- name: Create truststore dir if mTLS is enabled
+  file:
+    path: '{{kafka_truststore_dir}}'
+    state: directory
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
+  when: kafka_mTLS | bool
+
+
+- name: Copying truststore files
+  copy:
+    src: "{{ kafka_truststore_path }}"
+    dest: "{{ kafka_truststore_dir }}/kafka-truststore.jks"
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
+    mode: 0644
+  when: kafka_mTLS | bool
+
+- name: Copying keystore files
+  copy:
+    src: "{{ kafka_keystore_path }}"
+    dest: "{{ kafka_keystore_dir }}/kafka-keystore.jks"
+    group: '{{ kafka_group }}'
+    owner: '{{ kafka_user }}'
+    mode: 0644
+  when: kafka_mTLS | bool
+
+
 - name: Creating data directory
   file:
     path: "{{ kafka_data_store }}"

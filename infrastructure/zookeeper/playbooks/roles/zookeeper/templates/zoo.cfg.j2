@@ -21,7 +21,10 @@ dataDir={{ zookeeper_data_dir }}
 dataLogDir={{ zookeeper_data_log_dir }}
 
 # the port at which the clients will connect
+{% if not zookeeper_mTLS %}
 clientPort={{ zookeeper_client_port }}
+{% endif %} 
+
 
 # the maximum number of client connections.
 # increase this if you need to handle more clients
@@ -48,5 +51,25 @@ clientPort={{ zookeeper_client_port }}
 #server.2=hostname2:2888:3888
 
 {% for host in groups['zookeepernodes'] %}
-server.{{ hostvars[host].zookeeper_id | default(zookeeper_id) }}={{ hostvars[host]['private_ip'] }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
+server.{{ hostvars[host].zookeeper_id | default(zookeeper_id) }}={{ hostvars[host]['ansible_host'] }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
 {% endfor %}
+
+
+{% if zookeeper_mTLS %}
+
+sslQuorum=true
+secureClientPort=2182
+serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
+authProvider.x509=org.apache.zookeeper.server.auth.X509AuthenticationProvider
+
+ssl.keyStore.location={{ zookeeper_keystore_dir }}/zookeeper-keystore.jks
+ssl.keyStore.password={{ zookeeper_keystore_password }}
+ssl.trustStore.location={{ zookeeper_truststore_dir }}/zookeeper-truststore.jks
+ssl.trustStore.password={{ zookeeper_truststore_password }}
+
+ssl.quorum.keyStore.location={{ zookeeper_keystore_dir }}/zookeeper-keystore.jks
+ssl.quorum.keyStore.password={{ zookeeper_keystore_password }}
+ssl.quorum.trustStore.location={{ zookeeper_truststore_dir }}/zookeeper-truststore.jks
+ssl.quorum.trustStore.password={{ zookeeper_truststore_password }}
+
+{% endif %}

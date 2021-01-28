@@ -6,7 +6,7 @@
 
 - name: Install OpenJDK
   apt:
-    name: "openjdk-8-jre"
+    name: "openjdk-8-jdk"
 
 - name: Exporting JAVA_HOME
   shell: export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/

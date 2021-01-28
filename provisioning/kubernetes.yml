@@ -1,6 +1,13 @@
 ---
+- hosts: k8smasters
+  become: true
+  roles:
+    - kubernetes-install
+    - kubernetes-node
+
 - hosts: k8snodes
   become: true
   roles:
     - kubernetes-install
     - kubernetes-node
+

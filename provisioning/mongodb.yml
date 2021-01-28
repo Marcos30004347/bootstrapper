@@ -1,0 +1,6 @@
+---
+- hosts: mongodb
+  become: true
+  roles:
+    - role: 'infrastructure/mongodb/playbooks/roles/encrypt-rest'
+    - role: 'infrastructure/mongodb/playbooks/roles/mongodb'

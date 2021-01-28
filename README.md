@@ -1,4 +1,11 @@
 ## Workspace Template
+TODO:
+1. istio
+2. sql
+3. mongo
+4. refactoring
+5. security
+   
 
 Development enviroment with Kubernetes and Vagrant
 
@@ -8,11 +15,24 @@ Dependencies:
 1. VirtualBox
 2. Vangrant
 3. Ansible
-
+4. openssl
 There is currently three VMs:
     k8s-master
     k8s-node-1
     k8s-node-2
+
+### Setup
+
+You need to export some variables before deploying the enviroment, we recomend you to install direnv(https://direnv.net/) and setup a .envrc file exporting the following variables:
+
+1. CA_PASSWORD                      - the password used to create certificate authority
+1. TRUSTSTORE_PASSWORD              - the password used to create the truststore certificate
+2. KAFKA_USER_PASSWORD              - hashed password for the kafkaadmin user
+3. KAFKA_KEYSTORE_PASSWORD          - the password used to create the keystore certificate
+4. ZOOKEEPER_USER_PASSWORD          - hashed password for the zookeeperadmin user
+5. ZOOKEEPER_KEYSTORE_PASSWORD      - the password used to create the keystore certificate
+
+The .envrc file is in the .gitignore.
 
 ### Vagrant:
 To start the system run:

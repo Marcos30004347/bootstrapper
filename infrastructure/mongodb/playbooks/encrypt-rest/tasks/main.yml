@@ -1,0 +1,61 @@
+---
+- name: Check file /dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }} exists
+  stat:
+    path: "/dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }}"
+  register: file_details
+
+- name: Install cryptsetup for encryption at rest
+  apt:
+    name: cryptsetup-bin
+    update_cache: yes
+
+- name: Create /etc/luks directory if it does not exist
+  file:
+    path: /etc/luks
+    state: directory
+    owner: root
+    mode: "700"
+
+- name: Create luks kefile for encryption
+  template:
+    src: luks_keyfile.j2
+    dest: /etc/luks/keyfile
+    owner: root
+    mode: "700"
+  
+- name: Create a new primary partition
+  parted:
+    device: "{{ mongodb_partitioning_device_name }}"
+    number: 1
+  state: present
+
+- name: create LUKS container (remains unchanged if it already exists)
+  luks_device:
+    device: "{{ mongodb_partitioning_device_name }}1"
+    state: "opened"
+    keyfile: "/etc/luks/keyfile"
+    name: "{{ mongodb_partitioning_luks_name }}"
+
+- name: Create a volume group on top of /dev/mapper/{{mongodb_partitioning_luks_name}}
+  lvg:
+    vg: "{{ mongodb_partitioning_vg_name }}"
+  pvs: "/dev/mapper/{{mongodb_partitioning_luks_name}}"
+
+- name: Create a logical volume of 90% the size
+  lvol:
+    vg: "{{ mongodb_partitioning_vg_name }}"
+    lv: "{{ mongodb_partitioning_lv_name }}"
+    size: '{{mongodb_storage_percentage}}%FREE'
+
+
+- name: Create a filesystem on volume
+  filesystem:
+    fstype: xfs
+    dev: "/dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }}"
+
+- name: Mount DB directory
+  mount:
+    path: "{{ mongodb_db_path }}"
+    src: "/dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }}"
+    state: mounted
+  fstype: xfs

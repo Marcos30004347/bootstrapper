@@ -8,7 +8,8 @@
 
 - name: Install OpenJDK
   apt:
-    name: openjdk-8-jre
+    update_cache: yes
+    name: openjdk-8-jdk
 
 - name: Exporting JAVA_HOME
   shell: export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
@@ -94,6 +95,42 @@
   tags:
     - zookeeper_dirs
 
+- name: Create keystore dir if mTLS is enabled
+  file:
+    path: '{{zookeeper_keystore_dir}}'
+    state: directory
+    group: '{{ zookeeper_group }}'
+    owner: '{{ zookeeper_user }}'
+  when: zookeeper_mTLS | bool
+
+- name: Create truststore dir if mTLS is enabled
+  file:
+    path: '{{zookeeper_truststore_dir}}'
+    state: directory
+    group: '{{ zookeeper_group }}'
+    owner: '{{ zookeeper_user }}'
+  when: zookeeper_mTLS | bool
+
+
+- name: Copying truststore files
+  copy:
+    src: "{{ zookeeper_truststore_path }}"
+    dest: "{{ zookeeper_truststore_dir }}/zookeeper-truststore.jks"
+    group: '{{ zookeeper_group }}'
+    owner: '{{ zookeeper_user }}'
+    mode: 0644
+  when: zookeeper_mTLS | bool
+
+- name: Copying keystore files
+  copy:
+    src: "{{ zookeeper_keystore_path }}"
+    dest: "{{ zookeeper_keystore_dir }}/zookeeper-keystore.jks"
+    group: '{{ zookeeper_group }}'
+    owner: '{{ zookeeper_user }}'
+    mode: 0644
+  when: zookeeper_mTLS | bool
+
+
 # /usr/share/zookeeper/conf/zoo.cfg is the default file ZooKeeper will use when starting
 - name: Template configuration file to zoo.cfg
   template:
@@ -141,7 +178,9 @@
   tags:
     - zookeeper_config
 
+
 # Uncomment the log4j.properties line for setting the maximum number of logs to rollover and keep
+
 - name: Set maximum log rollover history
   replace:
     dest: '{{ zookeeper_dir }}/conf/log4j.properties'
@@ -157,7 +196,6 @@
     path: /usr/lib/systemd/system/
     state: directory
     mode: '0755'
-
 
 - name: Template ZooKeeper systemd service file
   template:
@@ -183,6 +221,13 @@
     state: absent
   tags:
     - zookeeper_cleanup
+
+
+
+
+
+
+
 
 # Set Ansible fact that ZooKeeper has completed installation. This is so that this role can be used in
 # other dependent roles. Those roles can check for this fact to determine whether or not this role

@@ -1,0 +1,71 @@
+all:
+  hosts:
+    elliot:
+      zookeeper_id                  : 1
+      kafka_broker_id               : 1
+      ansible_host                  : 192.168.50.10
+      pod_network_cidr              : 192.168.0.0/16
+      zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+      zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    darlene:
+      zookeeper_id                  : 2
+      kafka_broker_id               : 2
+      ansible_host                  : 170.154.32.13
+      pod_network_cidr              : 192.168.0.0/16
+      zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+      zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    tyrell:
+      zookeeper_id                  : 3
+      kafka_broker_id               : 3
+      ansible_host                  : 140.320.42.15
+      pod_network_cidr              : 192.168.0.0/16
+      zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+      zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    angela:
+      ansible_host                  : 165.120.88.2
+      host_name: angela
+      cron_renew_day: 1
+      mongodb_keyfile_path          : .private/certificates/mongo/mongo-keyfile
+      mongodb_ca_cert_path          : .private/certificates/ca-cert.pem
+      mongodb_ca_key_path           : .private/certificates/ca-key.pem
+      mongodb_cert_path             : .private/certificates/mongo1.crt
+      mongodb_key_path              : .private/certificates/mongo1.key
+
+  children:
+    k8smasters:
+      hosts:
+        ---
+    k8snodes:
+      hosts:
+        ---
+  
+    zookeepernodes:
+      hosts:
+        elliot:
+  
+    kafkanodes:
+      hosts:
+        elliot:
+
+    mongonodes:
+      hosts:
+        angela:
+    # mongoprimary:
+    #   hosts:
+    #     angela:
+    # mongosecondaries:
+    #   hosts:
+    #     angela:
+    #       priority: 1
