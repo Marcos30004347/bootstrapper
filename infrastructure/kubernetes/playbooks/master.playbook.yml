@@ -1,6 +1,0 @@
----
-- hosts: k8smasters
-  become: true
-  roles:
-    - role: 'kubernetes-install'
-    - role: 'kubernetes-master'

@@ -1,6 +1,0 @@
----
-- hosts: k8snodes
-  become: true
-  roles:
-    - kubernetes-install
-    - kubernetes-node

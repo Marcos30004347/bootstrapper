@@ -1,6 +1,22 @@
 ---
-- hosts: mongodb
+- hosts: mongo_nodes
   become: true
   roles:
-    - role: 'infrastructure/mongodb/playbooks/roles/encrypt-rest'
-    - role: 'infrastructure/mongodb/playbooks/roles/mongodb'
+  - role: 'infrastructure/mongodb/playbooks/roles/mongo'
+
+- hosts: mongo_servers
+  become: true
+  roles:
+  - role: 'infrastructure/mongodb/playbooks/roles/mongod'
+
+- hosts: mongoc_servers
+  become: true
+  roles:
+  - role: 'infrastructure/mongodb/playbooks/roles/mongoc'
+
+- hosts: mongos_servers
+  become: true
+  roles:
+  - role: 'infrastructure/mongodb/playbooks/roles/mongos'
+
+

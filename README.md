@@ -37,7 +37,11 @@ The .envrc file is in the .gitignore.
 ### Vagrant:
 To start the system run:
     
-    vagrant up
+    vagrant up --no-provision
+
+To setup all the system machines run:
+    
+    vagrant provision
 
 To suspend the system run:
     

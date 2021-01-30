@@ -18,11 +18,14 @@ systemLog:
 net:
   port: 27017
   bindIp: {% if hostvars[inventory_hostname]['host_private_ip'] is defined %}{{ hostvars[inventory_hostname]['host_private_ip'] }}{% else %}{{ hostvars[inventory_hostname]['ansible_host'] }}{% endif %},127.0.0.1
+  # ssl:
+  #   mode: requireSSL
+  #   PEMKeyFile: /etc/mongod/ssl/mongod1.pem
+  #   CAFile: /etc/mongod/ssl/example-ca-pub.crt
   tls:
     mode: requireTLS
-    certificateKeyFile: /etc/ssl/mongodb.pem
     CAFile:     /etc/ssl/ca.pem
-    allowConnectionsWithoutCertificates: true
+    certificateKeyFile: /etc/ssl/mongodb.pem
 #processManagement:
 security:
   keyFile: /etc/mongodb/mongo-keyfile

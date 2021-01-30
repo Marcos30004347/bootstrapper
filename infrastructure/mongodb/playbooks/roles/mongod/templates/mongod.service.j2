@@ -1,0 +1,12 @@
+[Unit]
+Description=High-performance, schema-free document-oriented database
+After=network.target
+
+[Service]
+User={{ mongodb_user }}
+Group={{ mongodb_group }}
+Type=forking
+ExecStart=/usr/bin/mongod --quiet --config /etc/mongod-{{ inventory_hostname }}.conf --logpath /var/log/mongo/mongod-{{ inventory_hostname }}.log
+
+[Install]
+WantedBy=multi-user.target

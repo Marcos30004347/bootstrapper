@@ -2,12 +2,11 @@
 - hosts: k8smasters
   become: true
   roles:
-    - kubernetes-install
-    - kubernetes-node
+    - infrastructure/kubernetes/playbooks/roles/kubernetes-install
+    - infrastructure/kubernetes/playbooks/roles/kubernetes-master
 
 - hosts: k8snodes
   become: true
   roles:
-    - kubernetes-install
-    - kubernetes-node
-
+    - infrastructure/kubernetes/playbooks/roles/kubernetes-install
+    - infrastructure/kubernetes/playbooks/roles/kubernetes-node

@@ -8,6 +8,7 @@
   apt:
     name: cryptsetup-bin
     update_cache: yes
+  when: file_details.stat.exists == false
 
 - name: Create /etc/luks directory if it does not exist
   file:
@@ -15,6 +16,7 @@
     state: directory
     owner: root
     mode: "700"
+  when: file_details.stat.exists == false
 
 - name: Create luks kefile for encryption
   template:
@@ -22,12 +24,14 @@
     dest: /etc/luks/keyfile
     owner: root
     mode: "700"
-  
+  when: file_details.stat.exists == false
+
 - name: Create a new primary partition
   parted:
     device: "{{ mongodb_partitioning_device_name }}"
     number: 1
-  state: present
+    state: present
+  when: file_details.stat.exists == false
 
 - name: create LUKS container (remains unchanged if it already exists)
   luks_device:
@@ -35,27 +39,34 @@
     state: "opened"
     keyfile: "/etc/luks/keyfile"
     name: "{{ mongodb_partitioning_luks_name }}"
+  when: file_details.stat.exists == false
 
 - name: Create a volume group on top of /dev/mapper/{{mongodb_partitioning_luks_name}}
   lvg:
     vg: "{{ mongodb_partitioning_vg_name }}"
-  pvs: "/dev/mapper/{{mongodb_partitioning_luks_name}}"
+    pvs:
+      - "/dev/mapper/{{mongodb_partitioning_luks_name}}"
+    pesize: 256M
+  when: file_details.stat.exists == false
 
-- name: Create a logical volume of 90% the size
+- name: Create a logical volume of {{mongodb_storage_percentage}}% the size
   lvol:
     vg: "{{ mongodb_partitioning_vg_name }}"
     lv: "{{ mongodb_partitioning_lv_name }}"
-    size: '{{mongodb_storage_percentage}}%FREE'
+    size: 1G
+  when: file_details.stat.exists == false
 
 
 - name: Create a filesystem on volume
   filesystem:
     fstype: xfs
     dev: "/dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }}"
+  when: file_details.stat.exists == false
 
 - name: Mount DB directory
   mount:
     path: "{{ mongodb_db_path }}"
     src: "/dev/mapper/{{ mongodb_partitioning_vg_name }}-{{ mongodb_partitioning_lv_name }}"
     state: mounted
-  fstype: xfs
+    fstype: xfs
+  when: file_details.stat.exists == false

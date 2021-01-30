@@ -1,6 +1,15 @@
 mongodb_user: mongodbadmin
 mongodb_group: mongodbadmin
 
+# The port in which mongos server should listen on 
+mongos_port: 27017
+# The port for mongo config server
+mongoc_port: 7777
+
+mongodb_version_major: 4
+mongodb_version_minnor: 4
+mongodb_version_patch: 2
+mongodb_datadir_prefix: /data
 mongodb_replicaset_name: rs0
 mongodb_db_path: "/mnt/mongo_data"
 mongodb_user_user_admin_any_database_name: siteUserAdmin
@@ -28,6 +37,6 @@ mongodb_partitioning_lv_name: mongo_data
 # backup_minute: "30"
 # backup_hour: "1"
 
-mongodb_password: "{{ lookup('env', 'mongodb_USER_PASSWORD') }}"
-mongodb_storage_percentage: 90
+mongodb_password: "{{ lookup('env', 'MONGODB_USER_PASSWORD') }}"
+mongodb_storage_percentage: 40
 # mongodb_data_store: /etc/data/mongodb

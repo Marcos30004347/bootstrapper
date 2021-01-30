@@ -1,0 +1,124 @@
+---
+# https://askubuntu.com/questions/842592/apt-get-fails-on-16-04-or-18-04-installing-mongodb
+- name: Create a User `"{{ mongo_user }}"`.
+  user:
+    name: "{{ mongodb_user }}"
+    password: "{{ mongodb_password }}"
+
+- name: Install gnupg
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - gnupg
+
+- name: Create hostfiles
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    force: yes
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+- name: Create iptables
+  template:
+    src: iptables.j2
+    dest: /etc/iptables.rules
+    force: yes
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+  notify:
+    - restart iptables
+  
+# - name: restore firewall state from a file
+#   community.general.iptables_state:
+#     state: restored
+#     path: /etc/iptables.conf
+#   async: "{{ ansible_timeout }}"
+#   poll: 0
+
+# - name: Restore firewall state from a file
+#   shell: iptables-restore < /etc/iptables.rules
+
+# - name: Remove existing keys
+#   shell: sudo rm /etc/apt/sources.list.d/mongodb*.list
+
+- name: Add keys
+  shell: wget -qO - https://www.mongodb.org/static/pgp/server-{{mongodb_version_major}}.{{mongodb_version_minnor}}.asc | sudo apt-key add -
+
+- name: Add keys
+  shell: sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv E52529D4
+
+# - name: Add an apt key by id from a keyserver
+#   apt_key:
+#     keyserver: keyserver.ubuntu.com
+#     id: 4B7C549A058F8B6B
+
+- name: Create the /etc/apt/sources.list.d/mongodb-org-{{mongodb_version_major}}.{{mongodb_version_minnor}}.list file for Ubuntu ({{ ansible_distribution_release }}) 
+  shell: echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ansible_distribution_release}}/mongodb-org/{{mongodb_version_major}}.{{mongodb_version_minnor}} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{mongodb_version_major}}.{{mongodb_version_minnor}}.list
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+
+- name: Install Mongodb
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - mongodb-org={{mongodb_version_major}}.{{mongodb_version_minnor}}.{{mongodb_version_patch}}
+    - mongodb-org-mongos={{mongodb_version_major}}.{{mongodb_version_minnor}}.{{mongodb_version_patch}}
+    - mongodb-org-shell={{mongodb_version_major}}.{{mongodb_version_minnor}}.{{mongodb_version_patch}}
+    - mongodb-org-server={{mongodb_version_major}}.{{mongodb_version_minnor}}.{{mongodb_version_patch}}
+
+- name: Enable port On SELinux
+  seport:
+    ports: "2700-2703,{{mongos_port}},{{mongoc_port}}"
+    proto: tcp
+    setype: mongod_port_t
+    state: present
+  when: ansible_selinux is defined and ansible_selinux != False and ansible_selinux.status == 'enabled'
+
+- name: Create the data directory for the namenode metadata
+  file:
+    path: '{{ mongodb_datadir_prefix }}'
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    state: directory
+    setype: mongod_var_lib_t
+    recurse: true
+
+- name: create log directory for mongodb
+  file:
+    path: /var/log/mongo
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    setype: mongod_log_t
+    recurse: true
+
+- name: create run directory for mongodb
+  file:
+    path: /var/run/mongo
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    setype: mongod_var_run_t
+    seuser: system_u
+    recurse: true
+
+# - name: Check transparent_hugepage exists
+#   stat:
+#     path: /sys/kernel/mm/transparent_hugepage
+#   register: transparent_hugepage_exits
+
+# - name: Configure transparent_hugepage/enabled never 
+#   command: echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
+#   when: transparent_hugepage_exits.stat.exists
+
+# - name: Configure transparent_hugepage/defrag never 
+#   command: echo 'never' > /sys/kernel/mm/transparent_hugepage/defrag
+#   when: transparent_hugepage_exits.stat.exists
