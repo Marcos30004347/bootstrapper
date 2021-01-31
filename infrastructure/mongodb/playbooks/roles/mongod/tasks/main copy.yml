@@ -45,6 +45,16 @@
 #   with_items: "{{groups.replication_servers}}"
   # ignore_errors: true
 
+- name: create log directory for mongodb
+  file:
+    path: /var/log/mongo
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    setype: mongod_log_t
+    recurse: true
+
+
 - name: Create the mongodb startup file
   template:
     src: mongod.service.j2
@@ -52,6 +62,7 @@
     mode: 0644
     seuser: system_u
   with_items: "{{groups.mongo_servers}}"
+
   # ignore_errors: true
 
 

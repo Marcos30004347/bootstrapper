@@ -16,3 +16,4 @@ keystore-truststore.sh
 *.crt
 *.srl
 *csr
+*.log

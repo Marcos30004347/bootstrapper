@@ -3,8 +3,23 @@
   file:
     path: '{{ mongodb_datadir_prefix }}/configdb'
     state: directory
-    owner: mongod
-    group: mongod
+    owner: '{{ mongodb_user }}'
+
+- name: create log directory for mongoc
+  file:
+    path: /var/log/mongo
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    setype: mongod_log_t
+    recurse: true
+
+- name: create log file directory for mongoc
+  file:
+    path: "/var/log/mongo/mongoc-config.log"
+    state: touch
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
 
 - name: Create the mongodb startup file
   template:
@@ -12,18 +27,22 @@
     dest: /etc/systemd/system/mongoc.service
     mode: 0644
     seuser: system_u
-
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+  
 - name: Create the mongodb configuration file
   template:
     src: mongoc.conf.j2
     dest: /etc/mongoc.conf
-
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+  
 - name: Copy the keyfile for authentication
   copy:
     src: "{{mongodb_key_file_path}}"
     dest: "{{ mongodb_datadir_prefix }}/secret"
-    owner: mongod
-    group: mongod
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
     mode: 0400
     setype: mongod_var_lib_t
 
@@ -44,10 +63,12 @@
   template:
     src: mongoc_init.js.j2
     dest: /tmp/mongoc_init.js
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
   when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
 
 - name: Create admin User
-  shell: /usr/bin/mongo "localhost:{{ mongoc_port }}/admin" /tmp/mongoc_init.js
+  shell: /usr/bin/mongo "127.0.0.1:{{ mongoc_port }}/admin" /tmp/mongoc_init.js
   when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
   ignore_errors: yes
 

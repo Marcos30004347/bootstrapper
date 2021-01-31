@@ -3,7 +3,8 @@ Description=High-performance, schema-free document-oriented database
 After=network.target
 
 [Service]
-User=mongod
+User={{ mongodb_user }}
+Group={{ mongodb_group }}
 Type=forking
 ExecStart=/usr/bin/mongos --quiet --config /etc/mongos.conf
 

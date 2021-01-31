@@ -1,5 +1,0 @@
----
-- include: prepare-host.yml
-- include: install.yml
-- include: security.yml
-- include: configure.yml

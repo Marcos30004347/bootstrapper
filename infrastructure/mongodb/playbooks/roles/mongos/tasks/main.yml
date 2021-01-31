@@ -1,25 +1,44 @@
 ---
+- name: create log directory for mongoc
+  file:
+    path: /var/log/mongo
+    state: directory
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+    setype: mongod_log_t
+    recurse: true
+
+- name: create log file directory for mongoc
+  file:
+    path: "/var/log/mongo/mongos.log"
+    state: touch
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
+
 - name: Create the mongos startup file
   template:
     src: mongos.service.j2
     dest: /etc/systemd/system/mongos.service
     mode: 0655
     seuser: system_u
-
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
 - name: Create the mongos configuration file
   template:
     src: mongos.conf.j2
     dest: /etc/mongos.conf
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
 
 - name: Copy the keyfile for authentication
   copy:
-    src: roles/mongod/files/secret
+    src: "{{mongodb_key_file_path}}"
     dest: "{{ mongodb_datadir_prefix }}/secret"
     owner: '{{ mongodb_user }}'
     group: '{{ mongodb_group }}'
     mode: 0400
 
-- name: Start the mongodb service
+- name: Start the mongos service
   systemd:
     name: mongos
     state: started
@@ -35,6 +54,8 @@
   template:
     src: mongos_init.js.j2
     dest: /tmp/mongos_init.js
+    owner: '{{ mongodb_user }}'
+    group: '{{ mongodb_group }}'
   when: "{{inventory_hostname == groups['mongos_servers'][0]}}"
 
 - name: Create sharding

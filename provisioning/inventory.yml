@@ -91,7 +91,6 @@ all:
     mongoc_servers:
       hosts:
         mongo1:
-        mongo2:
   
     mongos_servers:
       hosts:

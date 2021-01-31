@@ -3,9 +3,3 @@
   become: true
   roles:
     - role: 'infrastructure/kafka/playbooks/roles/kafka'
-    - role: 'infrastructure/kafka/playbooks/roles/kafka-create-topic'
-      vars:
-        kafka_topics: [ teste, testando ]
-
-    # - role: 'infrastructure/kubernetes/deploy/roles/kubernetes-install'
-    # - role: 'infrastructure/kubernetes/deploy/roles/kubernetes-master'
