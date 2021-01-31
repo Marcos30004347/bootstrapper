@@ -10,6 +10,7 @@ processManagement:
 
 net:
   port: {{ mongos_port }}
+  bindIp: 0.0.0.0
 
 security:
   keyFile: {{ mongodb_datadir_prefix }}/secret

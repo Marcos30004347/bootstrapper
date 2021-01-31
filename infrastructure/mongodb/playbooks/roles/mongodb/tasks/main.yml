@@ -1,0 +1,16 @@
+---
+- name: install mongodb
+  include_tasks: install.yml
+  when: ((['install'] | intersect(flags)) | length > 0)
+
+- name: setup mongod
+  include_tasks: mongod.yml
+  when: ((['mongod'] | intersect(flags)) | length > 0)
+
+- name: setup mongoc
+  include_tasks: mongoc.yml
+  when: ((['mongoc'] | intersect(flags)) | length > 0)
+
+- name: setup mongos
+  include_tasks: mongos.yml
+  when: ((['mongos'] | intersect(flags)) | length > 0)

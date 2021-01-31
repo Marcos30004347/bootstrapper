@@ -1,6 +1,6 @@
 systemLog:
   destination: file
-  path: "/var/log/mongo/mongoc-config.log"
+  path: /var/log/mongo/mongoc-config.log
   logAppend: true
 
 # fork and run in background
@@ -10,6 +10,7 @@ processManagement:
 
 net:
   port: {{ mongoc_port }}
+  bindIp: 0.0.0.0
 
 storage:
   dbPath: {{ mongodb_datadir_prefix }}/configdb

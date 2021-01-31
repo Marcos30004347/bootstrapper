@@ -1,5 +1,5 @@
 ---
-- name: create log directory for mongoc
+- name: create log directory for mongos
   file:
     path: /var/log/mongo
     state: directory
@@ -8,7 +8,7 @@
     setype: mongod_log_t
     recurse: true
 
-- name: create log file directory for mongoc
+- name: create log file directory for mongos
   file:
     path: "/var/log/mongo/mongos.log"
     state: touch
@@ -59,5 +59,10 @@
   when: "{{inventory_hostname == groups['mongos_servers'][0]}}"
 
 - name: Create sharding
-  shell: /usr/bin/mongo "localhost:{{ mongos_port }}/admin" /tmp/mongos_init.js
+  shell: /usr/bin/mongo "127.0.0.1:{{ mongos_port }}/admin" /tmp/mongos_init.js
   when: "{{inventory_hostname == groups['mongos_servers'][0]}}"
+  register: create_sharding
+
+- name: Create sharding output message
+  debug:
+    msg: "{{ create_sharding.stdout }}"

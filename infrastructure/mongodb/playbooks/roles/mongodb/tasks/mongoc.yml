@@ -67,8 +67,14 @@
     group: '{{ mongodb_group }}'
   when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
 
+
+#TODO UNCOMMENT THIS
 - name: Create admin User
   shell: /usr/bin/mongo "127.0.0.1:{{ mongoc_port }}/admin" /tmp/mongoc_init.js
   when: "{{inventory_hostname == groups['mongoc_servers'][0]}}"
+  register: create_admin
   ignore_errors: yes
 
+- name: Output message
+  debug:
+    msg: "{{ create_admin.stdout }}"

@@ -5,44 +5,44 @@ mongodb_version_major: 4
 mongodb_version_minnor: 4
 mongodb_version_patch: 2
 
-mongodb_log_file: /var/log/mongod.log
+# mongodb_log_file: /var/log/mongod.log
 
-# mongodb_datadir_prefix: /data
+mongodb_datadir_prefix: /data
 
-# mongo_admin_user: mongodbadmin
-# mongo_admin_pass: 123456
+mongo_admin_user: mongodbadmin
+mongo_admin_pass: "{{ lookup('env', 'MONGODB_USER_PASSWORD') }}"
 
-# # The port in which mongos server should listen on 
-# mongos_port: 27017
-# # The port for mongo config server
-# mongoc_port: 7777
-# mongos_chunk_size: 1
-# mongodb_replicaset_name: rs0
-# mongodb_db_path: "/mnt/mongo_data"
-# mongodb_user_user_admin_any_database_name: siteUserAdmin
-# mongodb_user_user_admin_any_database_password: "strong-password"
-# mongodb_user_root_name: siteRootAdmin
-# mongodb_user_root_password: "strong-password-2"
-# mongodb_main_database: main
-# mongodb_user_readwrite_main_database_name: "main-user"
-# mongodb_user_readwrite_main_database_password: "strong-password-3"
-# mongodb_partitioning_device_name: "/dev/sdb"
-# mongodb_partitioning_luks_passphrase: "strong-password-4"
-# mongodb_partitioning_luks_name: cryptolvm
-# mongodb_partitioning_vg_name: mongo_vg
-# mongodb_partitioning_lv_name: mongo_data
-# mongodb_certbot_admin_email: your.email@email.com
-# mongodb_monitoring_password: "strong-password-5"
-# mongodb_monitoring_db_user_name: "pmm"
-# mongodb_monitoring_db_user_password: "strong-password-6"
-# backup_db_user_name: backup
-# backup_db_user_password: "strong-password-7"
-# backup_region: "eu-west-3"
-# backup_bucket: "my-project-mongodb-backup"
-# backup_secret: "your-s3-secret"
-# backup_public: "your-s3-public"
-# backup_minute: "30"
-# backup_hour: "1"
+# The port in which mongos server should listen on 
+mongos_port: 27017
+# The port for mongo config server
+mongoc_port: 7777
+mongos_chunk_size: 1
+mongodb_replicaset_name: rs0
+mongodb_db_path: "/mnt/mongo_data"
+mongodb_user_user_admin_any_database_name: siteUserAdmin
+mongodb_user_user_admin_any_database_password: "strong-password"
+mongodb_user_root_name: siteRootAdmin
+mongodb_user_root_password: "strong-password-2"
+mongodb_main_database: main
+mongodb_user_readwrite_main_database_name: "main-user"
+mongodb_user_readwrite_main_database_password: "strong-password-3"
+mongodb_partitioning_device_name: "/dev/sdb"
+mongodb_partitioning_luks_passphrase: "strong-password-4"
+mongodb_partitioning_luks_name: cryptolvm
+mongodb_partitioning_vg_name: mongo_vg
+mongodb_partitioning_lv_name: mongo_data
+mongodb_certbot_admin_email: your.email@email.com
+mongodb_monitoring_password: "strong-password-5"
+mongodb_monitoring_db_user_name: "pmm"
+mongodb_monitoring_db_user_password: "strong-password-6"
+backup_db_user_name: backup
+backup_db_user_password: "strong-password-7"
+backup_region: "eu-west-3"
+backup_bucket: "my-project-mongodb-backup"
+backup_secret: "your-s3-secret"
+backup_public: "your-s3-public"
+backup_minute: "30"
+backup_hour: "1"
 
 mongodb_password: "{{ lookup('env', 'MONGODB_USER_PASSWORD') }}"
 mongodb_storage_percentage: 40

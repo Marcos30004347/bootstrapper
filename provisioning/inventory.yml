@@ -70,12 +70,6 @@ all:
 
 
   children:
-    mongo_nodes:
-      hosts:
-        mongo1:
-        mongo2:
-        mongo3:
-
     mongo_servers:
       hosts:
         mongo1:
@@ -91,7 +85,7 @@ all:
     mongoc_servers:
       hosts:
         mongo1:
-  
+
     mongos_servers:
       hosts:
         mongo1:
