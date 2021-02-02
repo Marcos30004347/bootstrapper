@@ -63,6 +63,3 @@
   when: "{{inventory_hostname == groups['mongos_servers'][0]}}"
   register: create_sharding
 
-- name: Create sharding output message
-  debug:
-    msg: "{{ create_sharding.stdout }}"

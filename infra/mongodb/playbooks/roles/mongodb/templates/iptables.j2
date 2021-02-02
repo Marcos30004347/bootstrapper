@@ -13,6 +13,8 @@
 {% if 'mongo_servers' in group_names %}
 {% for host in groups['mongo_servers'] %}
 -A INPUT -p tcp  --dport {{ hostvars[host]['mongod_port'] }} -j  ACCEPT
+# Maybe the next line should be commented
+-A INPUT -p tcp  --dport 27017 -j  ACCEPT
 {% endfor %}
 {% endif %}
 -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT

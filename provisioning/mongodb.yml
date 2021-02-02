@@ -1,25 +1,28 @@
 ---
 - hosts: mongo_servers
+  # serial: 3
   become: true
   roles:
   - {
-      role: 'infrastructure/mongodb/playbooks/roles/mongodb',
+      role: 'infra/mongodb/playbooks/roles/mongodb',
       flags: ['install', 'mongod']
     }
 
 - hosts: mongoc_servers
+  # serial: 3
   become: true
   roles:
   - {
-      role: 'infrastructure/mongodb/playbooks/roles/mongodb',
+      role: 'infra/mongodb/playbooks/roles/mongodb',
       flags: ['mongoc']
     }
 
 - hosts: mongos_servers
+  # serial: 3
   become: true
   roles:
   - {
-      role: 'infrastructure/mongodb/playbooks/roles/mongodb',
+      role: 'infra/mongodb/playbooks/roles/mongodb',
       flags: ['mongos']
     }
 

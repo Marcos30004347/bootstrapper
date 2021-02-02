@@ -23,7 +23,7 @@
 
 - name: Create the mongodb startup file
   template:
-    src: mongoc.service
+    src: mongoc.service.j2
     dest: /etc/systemd/system/mongoc.service
     mode: 0644
     seuser: system_u
@@ -75,6 +75,6 @@
   register: create_admin
   ignore_errors: yes
 
-- name: Output message
-  debug:
-    msg: "{{ create_admin.stdout }}"
+# - name: Output message
+#   debug:
+#     msg: "{{ create_admin.stdout }}"
