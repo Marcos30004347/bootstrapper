@@ -1,0 +1,13 @@
+FROM seratos-go1.15
+
+WORKDIR $GOPATH/user-service
+COPY . $GOPATH/user-service
+
+# RUN if [ -f ./service/go.sum ]; then rm ./service/go.sum; fi
+
+# RUN make compile-protos
+
+# RUN make
+
+# # ENTRYPOINT [ "make", "run" ]
+# ENTRYPOINT ["./executable"]
