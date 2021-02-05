@@ -1,0 +1,28 @@
+apiVersion: v1
+
+kind: Service
+
+metadata:
+  name: {{ service_name }}-service
+
+spec:
+  # This make this service accessable from outside the cluster
+  type: LoadBalancer
+  
+  # Use the kubernetes dns 
+  clusterIṔ: none
+
+  # The service ports
+  ports:
+    - name: rest_port
+      protocol: TCP
+      port: 80
+      targetPort: {{ service_rest_port }}
+  
+    - name: grpc_port
+      port: 81
+      targetPort: {{ service_grpc_port }}
+
+  # The selector for the service, needs to match the deployment label
+  selector:
+    app: {{ service_name }}

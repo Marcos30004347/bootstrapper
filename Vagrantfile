@@ -1,35 +1,39 @@
-# Defines our Vagrant environment
-#
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-VAGRANT_VM_PROVIDER = "virtualbox"
+NUMBER_OF_MACHINES = 3
 ANSIBLE_RAW_SSH_ARGS = []
+
 Vagrant.configure("2") do |config|
-    N = 3
     config.ssh.insert_key = false
 
-    (1..N-1).each do |machine_id|
-        ANSIBLE_RAW_SSH_ARGS << "-o IdentityFile=#{Dir.pwd}/.vagrant/machines/mongo#{machine_id}/virtualbox/private_key"
+    (1..NUMBER_OF_MACHINES-1).each do |machine_id|
+        ANSIBLE_RAW_SSH_ARGS << "-o IdentityFile=#{Dir.pwd}/.vagrant/machines/machine#{machine_id}/virtualbox/private_key"
     end
 
-    (1..N).each do |i|
+    (1..NUMBER_OF_MACHINES).each do |i|
         config.ssh.private_key_path = "/home/marcos/.vagrant.d/insecure_private_key"
-        config.vm.define "mongo#{i}" do |mongo|
-            mongo.vm.box = "ubuntu/xenial64"
-            mongo.vm.hostname  = "mongo#{i}"
-            mongo.vm.network :private_network, ip: "190.120.88.1#{i}"
+        config.vm.define "machine#{i}" do |machine|
+            machine.vm.box = "ubuntu/xenial64"
+            machine.vm.hostname  = "machine#{i}"
+            machine.vm.network :private_network, ip: "190.120.88.1#{i}"
             
-            mongo.vm.provider "virtualbox" do |vb|
+            machine.vm.provider "virtualbox" do |vb|
                 vb.memory = "4096"
                 vb.cpus = 2
             end
 
             # Boot all machines before provisioning
-            if i == N
-                mongo.vm.provision :ansible do |ansible|
+            if i == NUMBER_OF_MACHINES
+                # machine.vm.provision :ansible do |ansible|
+                #     ansible.limit           = "all"
+                #     ansible.playbook        = "ansible/mongodb.yml"
+                #     ansible.inventory_path  = "ansible/local-inventory.yml"
+                #     ansible.raw_ssh_args = ANSIBLE_RAW_SSH_ARGS
+                #     ansible.ask_become_pass = true
+                # end
+
+                machine.vm.provision :ansible do |ansible|
                     ansible.limit           = "all"
-                    ansible.playbook        = "provisioning/mongodb.yml"
-                    ansible.inventory_path  = "provisioning/inventory.yml"
+                    ansible.playbook        = "ansible/kubernetes.yml"
+                    ansible.inventory_path  = "ansible/local-inventory.yml"
                     ansible.raw_ssh_args = ANSIBLE_RAW_SSH_ARGS
                     ansible.ask_become_pass = true
                 end
@@ -68,20 +72,20 @@ Vagrant.configure("2") do |config|
     # end
 
     # config.vm.provision "ansible" do |ansible|
-    #     ansible.playbook       = "provisioning/zookeeper.yml"
-    #     ansible.inventory_path = "provisioning/inventory.yml"
+    #     ansible.playbook       = "ansible/zookeeper.yml"
+    #     ansible.inventory_path = "ansible/local-inventory.yml"
     #     ansible.ask_become_pass = true
     # end
 
     # config.vm.provision "ansible" do |ansible|
-    #     ansible.playbook       = "provisioning/kafka.yml"
-    #     ansible.inventory_path = "provisioning/inventory.yml"
+    #     ansible.playbook       = "ansible/kafka.yml"
+    #     ansible.inventory_path = "ansible/local-inventory.yml"
     #     ansible.ask_become_pass = true
     # end
 
     # config.vm.provision "ansible" do |ansible|
-    #     ansible.playbook       = "provisioning/kubernetes.yml"
-    #     ansible.inventory_path = "provisioning/inventory.yml"
+    #     ansible.playbook       = "ansible/kubernetes.yml"
+    #     ansible.inventory_path = "ansible/local-inventory.yml"
     #     ansible.ask_become_pass = true
     # end
 

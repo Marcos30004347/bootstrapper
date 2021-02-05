@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/protobuf v1.4.3
+	github.com/segmentio/kafka-go v0.4.9
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	google.golang.org/grpc v1.35.0

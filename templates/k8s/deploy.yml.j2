@@ -1,0 +1,44 @@
+apiVersion: "apps/v1"
+
+kind: Deployment
+
+metadata:
+	name: {{ service_name }}-deployment
+
+	labels:
+		app: {{ service_name }}
+
+spec:
+	replicas: {{ service_replicas }}
+
+	# Tells how the deployment will find the pods to manage
+	selector:
+		matchLabels:
+			# same as in Service
+			app: {{ service_name }}
+
+	template:
+		metadata:
+			labels:
+				app: {{ service_name }}
+		containers:
+		- name: {{ service_container_name }}
+			# The image of the container
+			image: {{ service_container_image }}
+				
+			# The ports in witch the container will be exposed
+			ports:
+			- containerPort: {{ service_rest_port }}
+				name: rest-port
+			- containerPort: {{ service_grpc_port }}
+				name: grpc_port
+
+			# The computational resources required by the container
+			resources:
+				requests:
+					memory: "64Mi"
+					cpu: "250m"
+				limits:
+					memory: "192Mi"
+					cpu: "700m"
+

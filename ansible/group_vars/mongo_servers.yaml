@@ -1,0 +1,15 @@
+mongodb_user: mongodbadmin
+mongodb_group: mongodbadmin
+mongodb_version_major: 4
+mongodb_version_minnor: 4
+mongodb_version_patch: 2
+mongodb_datadir_prefix: /data
+mongo_admin_user: mongodbadmin
+mongo_admin_pass: "{{ lookup('env', 'MONGODB_USER_PASSWORD') }}"
+mongos_port: 27017
+mongoc_port: 7777
+mongos_chunk_size: 1
+mongodb_replicaset_name: rs0
+mongodb_db_path: "/mnt/mongo_data"
+mongodb_password: "{{ lookup('env', 'MONGODB_USER_PASSWORD') }}"
+mongodb_key_file_path: .private/certificates/mongo/mongo-keyfile.key

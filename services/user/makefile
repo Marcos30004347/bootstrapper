@@ -6,11 +6,13 @@ run:
 	./executable
 
 container:
+	cp -r ../../protos protos/
 	docker build -t user-service .
+	rm -rf protos/
 
 compile-protos:
 	if [ -d ./codegen ]; then rm -rf ./codegen; fi
-	mkdir -p service/codegen
+	mkdir -p codegen
 	for service in `ls -d ./protos/*`; do \
 	  for serv_ver in `ls -d $$service/*`; do \
 	    for proto in `ls -d $$serv_ver/*`; do \

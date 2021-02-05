@@ -1,0 +1,16 @@
+---
+- hosts: kube-nodes
+  become: true
+  roles:
+  - {
+      role: 'infra/kubernetes/playbooks/roles/kubernetes',
+      flags: ['kube-install']
+    }
+
+- hosts: kube-master
+  become: true
+  roles:
+  - {
+      role: 'infra/kubernetes/playbooks/roles/kubernetes',
+      flags: ['kube-master']
+    }

@@ -1,0 +1,35 @@
+---
+- name: Wait for nodes to be ready
+  shell: "/usr/bin/kubectl get nodes"
+  register: nodes
+  until:      
+    - '" Ready "  in nodes.stdout'      
+  retries: 6
+  delay: 2
+
+- name: Download zsh installer
+  get_url:
+    url: https://istio.io/downloadIstio
+    dest: /tmp/downloadIstio.sh
+
+- name: Execute the zsh-installer.sh
+  shell: /tmp/downloadIstio.sh
+  environment:
+    ISTIO_VERSION: 1.8.2
+
+- name: Remove the zsh-installer.sh
+  file:
+    path: /tmp/downloadIstio.sh
+    state: absent
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: ./istio-1.8.2/bin
+    dest: /usr/bin/
+    mode: '0777'
+
+- name: Install Istio
+  shell: istioctl install --set profile=demo -y
+
+- name: Label istio
+  shell: kubectl label namespace default istio-injection=enabled
