@@ -80,7 +80,7 @@ To get the pods run:
 
 You can also get the kubernetes exclusive pods with:
 
-    $ kubectl get pods -n kube-system
+    $ kubectl get pods -n kubesystem
 
 To run a image inside the cluster run:
 

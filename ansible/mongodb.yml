@@ -1,6 +1,5 @@
 ---
 - hosts: mongo_servers
-  # serial: 3
   become: true
   roles:
   - {
@@ -9,7 +8,6 @@
     }
 
 - hosts: mongoc_servers
-  # serial: 3
   become: true
   roles:
   - {
@@ -18,7 +16,6 @@
     }
 
 - hosts: mongos_servers
-  # serial: 3
   become: true
   roles:
   - {

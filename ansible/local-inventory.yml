@@ -49,17 +49,22 @@ all:
       ansible_host                  : 190.120.88.11
       pod_network_cidr              : 192.120.0.0/16
       mongod_port                   : 2700
+      ansible_user                  : vagrant
+      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
 
     machine2:
       host_name                     : machine2
       ansible_host                  : 190.120.88.12
       mongod_port                   : 2701
+      ansible_user                  : vagrant
+      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
 
     machine3:
       host_name                     : machine3
       ansible_host                  : 190.120.88.13
       mongod_port                   : 2702
-
+      ansible_user                  : vagrant
+      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
 
   children:
     mongo_servers:
@@ -85,15 +90,30 @@ all:
         mongo1:
         mongo2:
 
-    kube-master:
-      hosts:
-        machine1:
-  
-    kube-nodes:
+    kubes:
       hosts:
         machine1:
         machine2:
         machine3:
+
+    kubemaster:
+      hosts:
+        machine1:
+  
+    kubenodes:
+      hosts:
+        machine2:
+        machine3:
+
+    consulnodes:
+      hosts:
+        machine1:
+        machine2:
+        machine3:
+
+    consuladmin:
+      hosts:
+        machine1:
     # k8smasters:
     #   hosts:
     #     ---

@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
                 machine.vm.provision :ansible do |ansible|
                     ansible.limit           = "all"
-                    ansible.playbook        = "ansible/kubernetes.yml"
+                    ansible.playbook        = "ansible/consul.yml"
                     ansible.inventory_path  = "ansible/local-inventory.yml"
                     ansible.raw_ssh_args = ANSIBLE_RAW_SSH_ARGS
                     ansible.ask_become_pass = true

@@ -1,0 +1,14 @@
+---
+- name: install consul
+  include_tasks: install.yml
+  when: ((['install'] | intersect(flags)) | length > 0)
+
+- name: admin consul
+  include_tasks: admin.yml
+  when: ((['admin'] | intersect(flags)) | length > 0)
+
+# - name: secure consul
+#   include_tasks: security.yml
+#   when: ((['secure'] | intersect(flags)) | length > 0)
+
+

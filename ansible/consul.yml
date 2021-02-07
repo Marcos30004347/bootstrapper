@@ -1,0 +1,16 @@
+---
+- hosts: consulnodes
+  become: true
+  roles:
+  - {
+      role: 'infra/consul/playbooks/roles/consul',
+      flags: ['install']
+    }
+
+- hosts: consuladmin
+  become: true
+  roles:
+  - {
+      role: 'infra/consul/playbooks/roles/consul',
+      flags: ['admin']
+    }
