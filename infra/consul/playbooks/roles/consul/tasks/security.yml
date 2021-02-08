@@ -1,6 +1,0 @@
-- name: Create certificates
-  shell: consul tls cert create -server -dc {{ consul_dc_name }}
-
-- name: Create server certificates
-  shell: "consul tls cert create -client -dc {{ consul_dc_name }}"
-

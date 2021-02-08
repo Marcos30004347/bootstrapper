@@ -46,25 +46,34 @@ all:
 
     machine1:
       host_name                     : machine1
+
+      consul_datacenter             : dc
+      consul_agent_id               : 0
+
       ansible_host                  : 190.120.88.11
-      pod_network_cidr              : 192.120.0.0/16
+      private_key                   : /vagrant/.vagrant/machines/machine1/virtualbox/private_key # local ssh key
       mongod_port                   : 2700
-      ansible_user                  : vagrant
-      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
+      # pod_network_cidr              : 192.120.0.0/16
 
     machine2:
       host_name                     : machine2
+
+      consul_datacenter             : dc
+      consul_agent_id               : 1
+    
       ansible_host                  : 190.120.88.12
+      private_key                   : /vagrant/.vagrant/machines/machine2/virtualbox/private_key # local ssh key
       mongod_port                   : 2701
-      ansible_user                  : vagrant
-      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
 
     machine3:
       host_name                     : machine3
+
+      consul_datacenter             : dc
+      consul_agent_id               : 2
+
       ansible_host                  : 190.120.88.13
+      private_key                   : /vagrant/.vagrant/machines/machine3/virtualbox/private_key # local ssh key
       mongod_port                   : 2702
-      ansible_user                  : vagrant
-      ansible_ssh_private_key_file  : "/home/marcos/.vagrant.d/insecure_private_key"
 
   children:
     mongo_servers:

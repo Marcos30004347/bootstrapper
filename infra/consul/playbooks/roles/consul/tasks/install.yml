@@ -53,8 +53,7 @@
     path: '{{ item }}'
   with_items:
     - /etc/consul.d
-    - /var/consul.d
-    - /cert/consul.d
+    - /var/consul
 
 
 - name: Create non-privileged system user

@@ -1,0 +1,34 @@
+---
+- name: Read keyfile
+  shell: cat /etc/consul.d/keyfile
+  register: keyfile
+
+- name: Create consul.hcl
+  template:
+    src: consul.hcl.j2
+    dest: /etc/consul.d/consul.hcl
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+    # mode: 640
+
+- name: Create server.hcl
+  template:
+    src: server.hcl.j2
+    dest: /etc/consul.d/server.hcl
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+    # mode: 640
+
+- name: Create consul.service
+  template:
+    src: consul.service.j2
+    dest: /etc/systemd/system/consul.service
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+    # mode: 640
+
+- name: Start consul
+  systemd:
+    name: consul.service
+    state: restarted
+    daemon_reload: yes

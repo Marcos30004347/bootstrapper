@@ -2,19 +2,20 @@ NUMBER_OF_MACHINES = 3
 ANSIBLE_RAW_SSH_ARGS = []
 
 Vagrant.configure("2") do |config|
-    config.ssh.insert_key = false
+    # config.ssh.insert_key = false
 
     (1..NUMBER_OF_MACHINES-1).each do |machine_id|
         ANSIBLE_RAW_SSH_ARGS << "-o IdentityFile=#{Dir.pwd}/.vagrant/machines/machine#{machine_id}/virtualbox/private_key"
     end
 
     (1..NUMBER_OF_MACHINES).each do |i|
-        config.ssh.private_key_path = "/home/marcos/.vagrant.d/insecure_private_key"
+        # config.ssh.private_key_path = "/home/marcos/.vagrant.d/insecure_private_key"
+        # config.ssh.forward_agent = true
+        # config.ssh.username = 'username'
         config.vm.define "machine#{i}" do |machine|
             machine.vm.box = "ubuntu/xenial64"
             machine.vm.hostname  = "machine#{i}"
             machine.vm.network :private_network, ip: "190.120.88.1#{i}"
-            
             machine.vm.provider "virtualbox" do |vb|
                 vb.memory = "4096"
                 vb.cpus = 2

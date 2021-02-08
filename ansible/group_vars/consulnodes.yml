@@ -1,3 +1,4 @@
 consul_user: consul
 consul_group: consul
 consul_version: 1.8.0
+consul_bootstrap_expect: 3

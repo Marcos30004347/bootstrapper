@@ -4,13 +4,13 @@
   roles:
   - {
       role: 'infra/consul/playbooks/roles/consul',
-      flags: ['install']
+      # flags: ['install']
     }
 
-- hosts: consuladmin
-  become: true
-  roles:
-  - {
-      role: 'infra/consul/playbooks/roles/consul',
-      flags: ['admin']
-    }
+# - hosts: consuladmin
+#   become: true
+#   roles:
+#   - {
+#       role: 'infra/consul/playbooks/roles/consul',
+#       # flags: ['admin']
+#     }

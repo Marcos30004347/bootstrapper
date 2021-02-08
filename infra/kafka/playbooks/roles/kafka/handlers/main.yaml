@@ -16,6 +16,6 @@
 
 - name: Restart Kafka service
   systemd:
-    name: zookeeper.service
+    name: kafka.service
     state: restarted
     daemon_reload: yes
