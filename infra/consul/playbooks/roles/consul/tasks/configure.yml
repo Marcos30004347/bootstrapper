@@ -11,13 +11,13 @@
     owner: '{{ consul_user }}'
     # mode: 640
 
-- name: Create server.hcl
-  template:
-    src: server.hcl.j2
-    dest: /etc/consul.d/server.hcl
-    group: '{{ consul_group }}'
-    owner: '{{ consul_user }}'
-    # mode: 640
+# - name: Create server.hcl
+#   template:
+#     src: server.hcl.j2
+#     dest: /etc/consul.d/server.hcl
+#     group: '{{ consul_group }}'
+#     owner: '{{ consul_user }}'
+#     # mode: 640
 
 - name: Create consul.service
   template:
@@ -30,5 +30,5 @@
 - name: Start consul
   systemd:
     name: consul.service
-    state: restarted
-    daemon_reload: yes
+    state: started
+    enabled: yes

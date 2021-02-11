@@ -6,7 +6,11 @@ After=network-online.target
 ConditionFileNotEmpty=/etc/consul.d/consul.hcl
 
 [Service]
+{%if (groups['consulnodes'] | length ) > 1%}
 Type=notify
+{%else%}
+Type=forking
+{% endif %}
 User={{consul_user}}
 Group={{consul_group}}
 ExecStart=/usr/bin/consul agent -config-dir /etc/consul.d/
