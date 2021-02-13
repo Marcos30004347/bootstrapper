@@ -1,0 +1,54 @@
+---
+- name: Sleep for 5 seconds and continue with play
+  wait_for:
+    timeout: 5
+
+- name: Set CONSUL_HTTP_TOKEN
+  shell: 'export CONSUL_HTTP_TOKEN={{ consul_bootstrap_secretid }}'
+
+- name: Set CONSUL_MGMT_TOKEN
+  shell: 'export CONSUL_MGMT_TOKEN={{ consul_bootstrap_secretid }}'
+  
+- name: Set CONSUL_HTTP_ADDR
+  shell: 'export CONSUL_HTTP_ADDR={{ ansible_host }}:8500'
+
+- name: Create node-policy.hcl
+  template:
+    src: policy.hcl.j2
+    dest: /etc/consul.d/node-policy.hcl
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+  when: 
+    - "'consuladmin' in group_names"
+
+- name: Create consul node policy
+  shell: consul acl policy create -token="{{ consul_bootstrap_secretid }}" -http-addr={{ ansible_host }}:8500 -name node-policy -rules @/etc/consul.d/node-policy.hcl
+  ignore_errors: yes
+  when: 
+    - "'consuladmin' in group_names"
+
+- name: Create consul node policy token
+  shell: consul acl token create -token="{{ consul_bootstrap_secretid }}" -http-addr={{ ansible_host }}:8500 -description "node token" -policy-name node-policy
+  ignore_errors: yes
+  register: acl_node_policy
+  when: 
+    - "'consuladmin' in group_names"
+
+- name: Check for local consul.d/tokens/node-policy-token.yml
+  local_action: stat path=../consul.d/tokens/node-policy-token.yml
+  register: local_policy_file
+
+- name: Save ACL bootstrap in host
+  local_action: copy content="{{ acl_node_policy.stdout }}" dest="../consul.d/tokens/node-policy-token.yml"
+  become: false
+  when: 
+    - "'consuladmin' in group_names"
+    - local_policy_file.stat.exists == false
+
+- name: Load ACL Token
+  include_vars:
+    file: "../consul.d/tokens/node-policy-token.yml"
+
+- name: Apply consul node policy token
+  shell: consul acl set-agent-token -http-addr={{ ansible_host }}:8500 agent "{{ SecretID }}"
+  ignore_errors: yes

@@ -1,0 +1,27 @@
+all:
+  hosts:
+    machine1:
+      consul_agent_id               : 0
+      host_name                     : machine1
+      ansible_host                  : 190.120.88.11
+
+    machine2:
+      consul_agent_id               : 1
+      host_name                     : machine2
+      ansible_host                  : 190.120.88.12
+
+    machine3:
+      consul_agent_id               : 2
+      host_name                     : machine3
+      ansible_host                  : 190.120.88.13
+
+  children:
+    consulnodes:
+      hosts:
+        machine1:
+        machine2:
+        machine3:
+
+    consuladmin:
+      hosts:
+        machine1:

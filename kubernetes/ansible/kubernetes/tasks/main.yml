@@ -1,0 +1,12 @@
+---
+- name: install kubernetes
+  include_tasks: install.yml
+  when: ((['install'] | intersect(flags)) | length > 0)
+
+- name: setup master
+  include_tasks: master.yml
+  when: kube_master is defined and kube_master == True
+
+- name: setup node
+  include_tasks: node.yml
+  when:  kube_master is not defined or kube_master == False

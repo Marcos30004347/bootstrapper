@@ -1,0 +1,8 @@
+---
+- hosts: k8s_nodes
+  become: true
+  roles:
+  - {
+      role: 'kubernetes/ansible/kubernetes',
+      flags: ['install']
+    }

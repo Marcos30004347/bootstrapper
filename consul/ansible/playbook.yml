@@ -1,0 +1,6 @@
+---
+- hosts: consulnodes
+  become: true
+  roles:
+  - role: 'consul/ansible/consul'
+

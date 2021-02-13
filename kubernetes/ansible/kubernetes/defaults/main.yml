@@ -1,0 +1,4 @@
+kube_home_dir: /home/vagrant
+kube_user: vagrant 
+kube_group: vagrant 
+kube_folder: vagrant 

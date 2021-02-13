@@ -1,0 +1,6 @@
+consul_user: consul
+consul_group: consul
+consul_version: 1.8.0
+consul_bootstrap_expect: 3
+consul_bootstrap_secretid: "{{ lookup('env', 'CONSUL_BOOTSTRAP_SECRETID') }}"
+consul_datacenter: datacenter

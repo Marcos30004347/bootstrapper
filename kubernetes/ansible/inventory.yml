@@ -1,0 +1,66 @@
+
+all:
+  hosts:
+    # elliot:
+    #   host_name                     : elliot
+    #   zookeeper_id                  : 1
+    #   kafka_broker_id               : 1
+    #   pod_network_cidr              : 192.168.0.0/16
+    #   zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+    #   zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+    #   kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+    #   kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+    #   ansible_host                  : 192.168.50.10
+    #   ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    # darlene:
+    #   host_name                     : darlene
+    #   zookeeper_id                  : 2
+    #   kafka_broker_id               : 2
+    #   ansible_host                  : 170.154.32.13
+    #   pod_network_cidr              : 192.168.0.0/16
+    #   zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+    #   zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+    #   kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+    #   kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+    #   ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    # tyrell:
+    #   host_name                     : tyrell
+    #   zookeeper_id                  : 3
+    #   kafka_broker_id               : 3
+    #   ansible_host                  : 140.320.42.15
+    #   pod_network_cidr              : 192.168.0.0/16
+    #   zookeeper_truststore_path     : .private/certificates/truststore/truststore.jks
+    #   zookeeper_keystore_path       : .private/certificates/zookeeper/zookeeper-keystore-1.jks
+    #   kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+    #   kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+    #   ansible_ssh_private_key_file  : /home/marcos/.vagrant.d/insecure_private_key
+
+    # angela:
+    #   host_name                     : angela
+    #   ansible_host                  : 165.120.88.2
+    #   cron_renew_day: 1
+    #   mongodb_ca_cert_path          : .private/certificates/mongo/mongo-ca-pub.crt
+    #   mongodb_cert_key_path         : .private/certificates/mongo/mongo1.pem
+    #   # mongodb_keyfile_path          : .private/certificates/mongo/mongo1.key
+
+    machine1:
+      host_name                     : machine1
+      ansible_host                  : 190.120.88.11
+      kube_master                   : True
+    
+    machine2:
+      host_name                     : machine2
+      ansible_host                  : 190.120.88.12
+
+    machine3:
+      host_name                     : machine3
+      ansible_host                  : 190.120.88.13
+
+  children:
+    k8s_nodes:
+      hosts:
+        machine1:
+        machine2:
+        machine3:

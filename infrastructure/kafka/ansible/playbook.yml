@@ -1,0 +1,12 @@
+---
+- hosts: kafkanodes
+  become: true
+  roles:
+    - role: 'infrastructure/kafka/ansible/kafka'
+
+- hosts: kafkanodes
+  become: true
+  roles:
+    - role: 'infrastructure/kafka/ansible/kafka-create-topic'
+      vars:
+        kafka_topics: [ teste, testando ]

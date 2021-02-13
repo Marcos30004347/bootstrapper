@@ -1,0 +1,6 @@
+---
+- name: Start consul
+  systemd:
+    name: consul.service
+    state: restarted
+    enabled: yes

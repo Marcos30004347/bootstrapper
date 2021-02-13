@@ -1,0 +1,12 @@
+---
+- name: Copy the join command to server location
+  copy:
+    src: join-command dest=/tmp/join-command.sh mode=0777
+
+- name: Join the node to cluster
+  command: sh /tmp/join-command.sh
+
+- name: Remove Join Command
+  file:
+    path: /tmp/join-command.sh
+    state: absent

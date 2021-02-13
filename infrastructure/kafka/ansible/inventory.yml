@@ -1,0 +1,30 @@
+all:
+  hosts:
+    machine1:
+      host_name                     : machine2
+      kafka_broker_id               : 1
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_host                  : 192.168.50.10
+      private_key                   : /vagrant/.vagrant/machines/machine2/virtualbox/private_key # local ssh key
+
+    machine2:
+      host_name                     : machine2
+      kafka_broker_id               : 2
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_host                  : 190.120.88.12
+      private_key                   : /vagrant/.vagrant/machines/machine2/virtualbox/private_key # local ssh key
+
+    machine3:
+      host_name                     : machine3
+      kafka_broker_id               : 3
+      kafka_truststore_path         : .private/certificates/truststore/truststore.jks
+      kafka_keystore_path           : .private/certificates/kafka/kafka-keystore-1.jks
+      ansible_host                  : 190.120.88.13
+      private_key                   : /vagrant/.vagrant/machines/machine3/virtualbox/private_key # local ssh key
+
+  children:
+    kafkanodes:
+      hosts:
+        machine1:

@@ -1,5 +1,0 @@
----
-- hosts: kafkanodes
-  become: true
-  roles:
-    - role: 'infrastructure/kafka/playbooks/roles/kafka'

@@ -1,0 +1,17 @@
+---
+- name: install consul
+  include_tasks: install.yml
+
+- name: admin consul
+  include_tasks: certificates.yml
+
+- name: configure consul
+  include_tasks: configure.yml
+
+- name: configure acl consul
+  include_tasks: acl.yml
+
+# - name: start consul
+#   include_tasks: start.yml
+
+

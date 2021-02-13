@@ -1,5 +1,0 @@
----
-- hosts: zookeepernodes
-  become: true
-  roles:
-    - role: 'infrastructure/zookeeper/playbooks/roles/zookeeper'

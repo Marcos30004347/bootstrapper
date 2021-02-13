@@ -1,0 +1,7 @@
+AccessorID:       44262576-a5d5-474f-cd2d-545308c3ef49
+SecretID:         5cfce76f-4d8f-730a-687e-fdfe13837ef9
+Description:      node token
+Local:            false
+Create Time:      2021-02-13 15:11:42.712985315 +0000 UTC
+Policies:
+   94ff07da-710f-adde-248a-3cd1b0e0de86 - node-policy

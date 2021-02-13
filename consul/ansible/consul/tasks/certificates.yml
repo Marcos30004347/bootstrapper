@@ -1,0 +1,176 @@
+- name: Find all consul old certificates
+  find:
+    paths:
+      - /etc/consul.d/
+    patterns: "*.pem"
+  register: old_certificates
+
+- name: Remove old certificate files
+  file:
+    path: '{{ item.path }}'
+    state: absent
+  with_items: '{{ old_certificates.files }}'
+
+- name: Copy Certificate Authority, Certificate Authority Key and Keyfile
+  copy:
+    src: '{{ item }}'
+    dest: /etc/consul.d/
+  with_items:
+    - ../certificates/consul-ca.pem
+    - ../certificates/{{ consul_datacenter }}-server-{{ consul_agent_id }}.pem
+    - ../certificates/{{ consul_datacenter }}-server-{{ consul_agent_id }}-key.pem
+    - ../certificates/gossip-key.pem
+
+# - name: Create server certificates
+#   shell: consul tls cert create -server -dc {{ consul_datacenter }} -ca=/etc/consul.d/consul-agent-ca.pem -key=/etc/consul.d/consul-agent-ca-key.pem
+  
+
+# - name: Create the gossip key code
+#   shell: consul keygen
+#   register: gossip_key
+#   when: 
+#     - "'consuladmin' in group_names"
+
+# - name: Create gossip key file
+#   copy:
+#     content: "{{ gossip_key.stdout }}"
+#     dest: /etc/consul.d/keyfile
+#   when: 
+#     - "'consuladmin' in group_names"
+
+# - name: Create Certificate Authority(CA)
+#   shell: consul tls ca create
+#   when: 
+#     - "'consuladmin' in group_names"
+
+# - name: Create server certificates
+#   shell: "consul tls cert create -server -dc {{ consul_datacenter }}"
+#   with_items:
+#     - "{{ groups['consulnodes'] }}"
+#   when: "'consuladmin' in group_names"
+
+# - name: Create client certificates
+#   shell: "consul tls cert create -client -dc {{ consul_datacenter }}"
+#   with_items:
+#     - "{{ groups['consulnodes'] }}"
+#   when: "'consuladmin' in group_names"
+
+# - name: Find created Certificates
+#   find:
+#     paths:
+#       - ./
+#     patterns: "*.pem"
+#   register: certificates_matches
+
+# - name: Copy certificates to /etc/consul.d
+#   copy:
+#     remote_src: True
+#     src: '{{ item.path }}'
+#     dest: /etc/consul.d/{{ item.path | basename }}
+#   with_items: '{{ certificates_matches.files }}'
+
+# - name: Send server certificates to agents
+#   synchronize:
+#     src: '/etc/consul.d/{{ item[1].path | basename }}'
+#     dest: "/etc/consul.d/{{ item[1].path }}"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item[0] }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#     - "( item[1].path | basename ) is match('{{ hostvars[item[0]]['consul_datacenter'] }}-server-consul-{{ hostvars[item[0]]['consul_agent_id'] }}.pem')"
+#   with_nested:
+#     - "{{ groups['consulnodes'] }}"
+#     - "{{ certificates_matches.files }}"
+
+# - name: Send server key certificates to agents
+#   synchronize:
+#     src: '/etc/consul.d/{{ item[1].path | basename }}'
+#     dest: "/etc/consul.d/{{ item[1].path }}"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item[0] }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#     - "( item[1].path | basename ) is match('{{ hostvars[item[0]]['consul_datacenter'] }}-server-consul-{{ hostvars[item[0]]['consul_agent_id'] }}-key.pem')"
+#   with_nested:
+#     - "{{ groups['consulnodes'] }}"
+#     - "{{ certificates_matches.files }}"
+
+
+# - name: Send client certificates to agents
+#   synchronize:
+#     src: '/etc/consul.d/{{ item[1].path | basename }}'
+#     dest: "/etc/consul.d/{{ item[1].path }}"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item[0] }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#     - "( item[1].path | basename ) is match('{{ hostvars[item[0]]['consul_datacenter'] }}-client-consul-{{ hostvars[item[0]]['consul_agent_id'] }}.pem')"
+#   with_nested:
+#     - "{{ groups['consulnodes'] }}"
+#     - "{{ certificates_matches.files }}"
+
+
+# - name: Send client key certificates to agents
+#   synchronize:
+#     src: '/etc/consul.d/{{ item[1].path | basename }}'
+#     dest: "/etc/consul.d/{{ item[1].path }}"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item[0] }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#     - "( item[1].path | basename ) is match('{{ hostvars[item[0]]['consul_datacenter'] }}-client-consul-{{ hostvars[item[0]]['consul_agent_id'] }}-key.pem')"
+#   with_nested:
+#     - "{{ groups['consulnodes'] }}"
+#     - "{{ certificates_matches.files }}"
+
+# - name: Send CA certificate to agents
+#   synchronize:
+#     src: '/etc/consul.d/consul-agent-ca.pem'
+#     dest: "/etc/consul.d/consul-agent-ca.pem"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#   with_items:
+#     - "{{ groups['consulnodes'] }}"
+
+# - name: Send keyfile to agents
+#   synchronize:
+#     src: '/etc/consul.d/keyfile'
+#     dest: "/etc/consul.d/keyfile"
+#     mode: pull
+#     private_key: '{{ private_key }}'
+#   delegate_to: '{{ item }}'
+#   when:
+#     - "'consuladmin' in group_names"
+#   with_items:
+#     - "{{ groups['consulnodes'] }}"
+
+# - name: Remove file (delete file)
+#   file:
+#     path: '{{ item.path }}'
+#     state: absent
+#   with_items: '{{ certificates_matches.files }}'
+
+# - name: Remove unnecessary files from /etc/consul.d
+#   file:
+#     path: '/etc/consul.d/{{ item.path | basename }}'
+#     state: absent
+#   when: |
+#     (([
+#       '{{ consul_datacenter }}-client-consul-{{ consul_agent_id }}-key.pem',
+#       '{{ consul_datacenter }}-client-consul-{{ consul_agent_id }}.pem',
+#       '{{ consul_datacenter }}-server-consul-{{ consul_agent_id }}-key.pem',
+#       '{{ consul_datacenter }}-server-consul-{{ consul_agent_id }}.pem',
+#       'keyfile',
+#       'consul-agent-ca.pem',
+#       'consul-agent-ca-key.pem'
+#     ] | intersect(['{{ item.path | basename }}'])) | length < 1)
+#   with_items: '{{ certificates_matches.files }}'
+
+

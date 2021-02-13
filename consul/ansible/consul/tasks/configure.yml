@@ -1,0 +1,24 @@
+---
+- name: Read keyfile
+  shell: cat /etc/consul.d/gossip-key.pem
+  register: keyfile
+
+- name: Create consul.hcl
+  template:
+    src: consul.hcl.j2
+    dest: /etc/consul.d/consul.hcl
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+
+- name: Create consul.service
+  template:
+    src: consul.service.j2
+    dest: /etc/systemd/system/consul.service
+    group: '{{ consul_group }}'
+    owner: '{{ consul_user }}'
+
+- name: Start consul
+  systemd:
+    name: consul.service
+    state: started
+    enabled: yes
