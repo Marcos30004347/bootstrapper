@@ -1,0 +1,25 @@
+service:
+  name: user
+
+database:
+  kind: mongodb
+  url : mongo:2070
+  user: user
+  pass: password
+
+discovery:
+  datacenter: datacenter
+  token: 12asd3fas45
+  connect:
+    - "190.129.9.11"
+    - "190.129.9.12"
+    - "190.129.9.13"
+
+topology:
+  connect:  
+    - email
+    - signin
+    - sigup
+  allow:
+    - signin
+    - sigup

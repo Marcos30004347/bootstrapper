@@ -1,0 +1,19 @@
+{
+    "service": {
+        "name": "web",
+        "tags": [
+        "rails"
+        ],
+        "port": 80,
+        "connect": {
+            "sidecar_service": {}
+        },
+        "check": {
+            "args": [
+              "curl",
+              "localhost"
+            ],
+            "interval": "10s"
+        }
+    }
+}

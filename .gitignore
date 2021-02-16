@@ -19,3 +19,4 @@ keystore-truststore.sh
 go.sum
 codegen
 .ignore/
+join-command.sh

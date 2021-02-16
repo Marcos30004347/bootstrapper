@@ -1,0 +1,6 @@
+RUN apk add gcc openssl ruby2.7 ruby-dev make
+RUN gem install bundler
+RUN gem install json
+RUN gem install mongo
+RUN gem install grpc
+RUN gem install grpc-tools

@@ -1,0 +1,27 @@
+service:
+  name: user
+  entrypoint: /usr/bin/user --config /etc/user/config.yml
+  lang: golang
+database:
+  url : mongo:2070
+  user: user
+  pass: password
+
+discovery:
+  datacenter: datacenter
+  token: 5cfce76f-4d8f-730a-687e-fdfe13837ef9
+  encrypt: RDfm4ZNyE6ZZIJSnPLNcVI6PEBUjHXZ2IxRP2VTcLgc=
+  ca: $root/consul-ca.pem
+  connect:
+    - "190.120.88.11"
+    - "190.120.88.12"
+    - "190.120.88.13"
+
+topology:
+  connect:
+    - email
+    - signin
+    - sigup
+  deny:
+    - signin
+    - sigup

@@ -36,3 +36,8 @@ start_join = [{% for host in groups['consulnodes'] %}"{{ hostvars[host]['ansible
 bootstrap_expect = {{ consul_bootstrap_expect }}
 
 
+connect {
+  enabled = true
+}
+
+grpc_port = 8502

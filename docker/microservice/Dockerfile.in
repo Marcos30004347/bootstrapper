@@ -1,0 +1,23 @@
+FROM seratos/alpine:latest
+
+RUN apk --no-cache add ca-certificates wget unzip curl python3 py3-pip openrc
+
+RUN pip3 install j2cli
+
+#if LANG == 1
+    #include "langs/golang.dockerfile.in"
+#elif LANG == 2
+    #include "langs/ruby.dockerfile.in"
+#endif
+
+#include "consul/consul.dockerfile"
+
+COPY CONF_FILE ./etc/service/config.yml
+
+RUN j2 /tmp/config.hcl.j2 /etc/service/config.yml >> /etc/consul.d/config.hcl
+RUN j2 /tmp/consul.j2 /etc/service/config.yml >> /etc/init.d/consul
+
+RUN rm /tmp/config.hcl.j2
+RUN rm /tmp/consul.j2
+
+ENTRYPOINT ENTRY

@@ -11,7 +11,7 @@
 - name: configure acl consul
   include_tasks: acl.yml
 
-# - name: start consul
-#   include_tasks: start.yml
+- name: start consul
+  include_tasks: services.yml
 
 

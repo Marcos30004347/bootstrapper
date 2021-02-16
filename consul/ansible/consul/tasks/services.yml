@@ -1,0 +1,14 @@
+---
+- name: Display paths of all .txt files in dir
+  debug:
+    msg: "{{ lookup('fileglob', '../consul.d/services/*.json') }}"
+
+- name: Copy each file over that matches the given pattern
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/consul.d/"
+    owner: '{{ consul_user }}'
+    group: '{{ consul_group }}'
+    mode: '0600'
+  with_fileglob:
+    - "../consul.d/services/*.json"

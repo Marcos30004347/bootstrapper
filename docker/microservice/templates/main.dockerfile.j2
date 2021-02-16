@@ -1,0 +1,17 @@
+FROM seratos/alpine:latest
+
+RUN apk --no-cache add ca-certificates wget unzip curl
+
+{%include './templates/langs/' + service.lang + '.dockerfile.j2'%}
+
+{%include './templates/consul/consul.dockerfile.j2'%}
+
+COPY CONF_FILE ./etc/service/config.yml
+
+RUN j2 /tmp/config.hcl.j2 /etc/service/config.yml >> /etc/consul.d/config.hcl
+RUN j2 /tmp/consul.j2 /etc/service/config.yml >> /etc/init.d/consul
+
+RUN rm /tmp/config.hcl.j2
+RUN rm /tmp/consul.j2
+
+ENTRYPOINT ENTRY

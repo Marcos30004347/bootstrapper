@@ -1,0 +1,22 @@
+FROM serator-consul
+
+COPY ./consul/config.hcl /etc/consul.d/
+COPY ./consul/consul-client.service /etc/systemd/system/consul-client.service
+
+RUN systemctl daemon-reload
+RUN systemctl start consul-client
+
+FROM seratos-go1.15
+
+WORKDIR $GOPATH/user-service
+COPY ./src $GOPATH/user-service
+
+RUN if [ -f ./service/go.sum ]; then rm ./service/go.sum; fi
+
+RUN make compile-protos
+
+RUN make
+
+
+# ENTRYPOINT [ "make", "run" ]
+ENTRYPOINT ["./executable"]

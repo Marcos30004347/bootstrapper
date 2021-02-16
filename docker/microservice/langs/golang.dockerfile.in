@@ -1,0 +1,54 @@
+RUN apk --no-cache add ca-certificates wget
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk
+RUN apk add glibc-2.28-r0.apk
+
+ENV GOLANG_VERSION=1.15.6
+ENV PROTOC_VERSION=3.6.1
+
+RUN apk add --no-cache --update ca-certificates wget git curl unzip openssh && apk upgrade --update --no-cache
+
+RUN set -ex && apk add --no-cache bash gcc musl-dev openssl openssl-dev alpine-sdk go
+RUN export GOROOT_BOOTSTRAP="$(go env GOROOT)"
+RUN export GOOS="$(go env GOOS)"
+RUN export GOARCH="$(go env GOARCH)"
+RUN export GO386="$(go env GO386)"
+RUN export GOARM="$(go env GOARM)"
+RUN export GOHOSTOS="$(go env GOHOSTOS)"
+RUN export GOHOSTARCH="$(go env GOHOSTARCH)"
+
+RUN wget -q "https://golang.org/dl/go${GOLANG_VERSION}.src.tar.gz" -O golang.tar.gz
+RUN tar -C "/usr/local" -xzf "golang.tar.gz"
+RUN	rm "golang.tar.gz"
+RUN	cd "/usr/local/go/src"
+RUN	for p in "/go-alpine-patches/*.patch"; do [ -f "$p" ] || continue; patch -p2 -i "$p"; done;
+RUN ./make.bash
+RUN rm -rf /go-alpine-patches
+
+RUN wget -q "https://github.com/google/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip" -O protoc.zip
+RUN	cd /usr
+RUN	unzip ../protoc.zip
+RUN	rm -rf /protoc.zip
+RUN	rm -rf /usr/readme.txt
+RUN	apk del --purge unzip
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin"
+RUN	chmod -R 777 "$GOPATH"
+
+WORKDIR $GOPATH
+
+RUN git config --global http.https://gopkg.in.followRedirects true
+RUN go get -u -v github.com/golang/dep/cmd/dep
+
+
+RUN go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go
+
+RUN go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+RUN go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
