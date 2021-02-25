@@ -5,7 +5,6 @@ codegen:
 build:
 	GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build .
 
-
 run:
 	sudo env "PATH=${PATH}" go run . --etcd-servers localhost:2379 \
     --authentication-kubeconfig ${HOME}/.kube/config \

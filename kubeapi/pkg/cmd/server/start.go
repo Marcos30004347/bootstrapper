@@ -11,9 +11,13 @@ import (
 
 	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant/v1alpha1"
 	"github.com/marcos30004347/kubeapi/pkg/apiserver"
+
+	// It’s called a client set because it contains multiple clients for all native Kubernetes resources.
+	clientset "github.com/marcos30004347/kubeapi/pkg/generated/clientset/versioned"
+
+	//  “Client Sets” includes the Watch verb, which offers an event interface that reacts to changes (adds, removes, updates) of objects. Informers give a higher-level programming interface for the most common use case for watches
 	informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
 
-	clientset "github.com/marcos30004347/kubeapi/pkg/generated/clientset/versioned"
 	"k8s.io/apiserver/pkg/admission"
 	"k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -80,7 +84,7 @@ func (o *CustomServerOptions) Config() (*apiserver.Config, error) {
 	if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
 	}
-
+	// Here is the setup for the client and informers
 	o.RecommendedOptions.ExtraAdmissionInitializers = func(c *genericapiserver.RecommendedConfig) ([]admission.PluginInitializer, error) {
 		client, err := clientset.NewForConfig(c.LoopbackClientConfig)
 		if err != nil {
