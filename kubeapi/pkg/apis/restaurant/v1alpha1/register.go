@@ -35,10 +35,6 @@ var (
 	AddToScheme        = localSchemeBuilder.AddToScheme
 )
 
-func addDefaultingFuncs(scheme *runtime.Scheme) error {
-	return RegisterDefaults(scheme)
-}
-
 func init() {
 	// We only register manually written functions here. The registration of the
 	// generated functions takes place in the generated files. The separation
@@ -49,7 +45,10 @@ func init() {
 // Adds the list of known types to the given scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&Pizza{},
+		&Foo{},
+		&FooList{},
+		&Bar{},
+		&BarList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
