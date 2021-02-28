@@ -9,6 +9,7 @@ import (
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
+	"github.com/marcos30004347/kubeapi/pkg/admission/plugin/foobar"
 	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant/v1alpha1"
 	"github.com/marcos30004347/kubeapi/pkg/apiserver"
 
@@ -144,5 +145,11 @@ func (o CustomServerOptions) Validate() error {
 }
 
 func (o *CustomServerOptions) Complete() error {
+	// register admission plugins
+	foobar.Register(o.RecommendedOptions.Admission.Plugins)
+
+	// add admisison plugins to the RecommendedPluginOrder
+	o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "PizzaToppings")
+
 	return nil
 }

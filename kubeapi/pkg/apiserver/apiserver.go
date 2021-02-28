@@ -9,6 +9,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/version"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+
+	"k8s.io/apiserver/pkg/registry/rest"
+
+	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+	customregistry "github.com/marcos30004347/kubeapi/pkg/registry"
+	barstorage "github.com/marcos30004347/kubeapi/pkg/registry/restaurant/bar"
+	foostorage "github.com/marcos30004347/kubeapi/pkg/registry/restaurant/foo"
 )
 
 var (
@@ -85,6 +92,23 @@ func (c CompletedConfig) New() (*CustomServer, error) {
 
 	s := &CustomServer{
 		GenericAPIServer: genericServer,
+	}
+
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(restaurant.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+
+	v1alpha1storage := map[string]rest.Storage{}
+	// NewREST from the registry/etcd.go
+	v1alpha1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	v1alpha1storage["toppings"] = customregistry.RESTInPeace(barstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
+
+	// NewREST from the registry/etcd.go
+	v1beta1storage := map[string]rest.Storage{}
+	v1beta1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	apiGroupInfo.VersionedResourcesStorageMap["v1beta1"] = v1beta1storage
+
+	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
+		return nil, err
 	}
 
 	return s, nil

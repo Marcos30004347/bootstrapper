@@ -634,6 +634,337 @@ After that, you should actualy install thos versions in the api server, to that 
 
 After adding all those types, delete the old generated code, and run the codegen again.
 
+v1alpha1:
+types.go:
+    package v1alpha1
+
+    import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+    // +genclient
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // Foo specifies an offered Foo with bars.
+    type Foo struct {
+        metav1.TypeMeta   `json:",inline"`
+        metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+        Spec   FooSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+        Status FooStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+    }
+
+    type FooSpec struct {
+        // +k8s:conversion-gen=false
+        // bars is a list of Bar names. They don't have to be unique. Order does not matter.
+        Bar []string `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+    }
+
+    type FooStatus struct {
+        // cost is the cost of the whole Foo including all bars.
+        Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
+    }
+
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // FooList is a list of Foo objects.
+    type FooList struct {
+        metav1.TypeMeta `json:",inline"`
+        metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+        Items []Foo `json:"items" protobuf:"bytes,2,rep,name=items"`
+    }
+
+    // +genclient
+    // +genclient:nonNamespaced
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // Bar
+    type Bar struct {
+        metav1.TypeMeta   `json:",inline"`
+        metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+        Spec BarSpec
+    }
+
+    type BarSpec struct {
+        // cost is the cost of one instance of this topping.
+        Cost float64 `json:"cost" protobuf:"bytes,1,name=cost"`
+    }
+
+    // +genclient:nonNamespaced
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // BarList is a list of Bar objects.
+    type BarList struct {
+        metav1.TypeMeta `json:",inline"`
+        metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+        Items []Bar `json:"items" protobuf:"bytes,2,rep,name=items"`
+    }
+
+register.go:
+
+    package v1alpha1
+
+    import (
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apimachinery/pkg/runtime/schema"
+    )
+
+    const GroupName = "restaurant.programming-kubernetes.info"
+
+    // SchemeGroupVersion is group version used to register these objects
+    var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}
+
+    var (
+        // TODO: move SchemeBuilder with zz_generated.deepcopy.go to k8s.io/api.
+        // localSchemeBuilder and AddToScheme will stay in k8s.io/kubernetes.
+        SchemeBuilder      runtime.SchemeBuilder
+        localSchemeBuilder = &SchemeBuilder
+        AddToScheme        = localSchemeBuilder.AddToScheme
+    )
+
+    func init() {
+        // We only register manually written functions here. The registration of the
+        // generated functions takes place in the generated files. The separation
+        // makes the code compile even when the generated files are missing.
+        localSchemeBuilder.Register(addKnownTypes, addDefaultingFuncs)
+    }
+
+    // Adds the list of known types to the given scheme.
+    func addKnownTypes(scheme *runtime.Scheme) error {
+        scheme.AddKnownTypes(SchemeGroupVersion,
+            &Foo{},
+            &FooList{},
+            &Bar{},
+            &BarList{},
+        )
+        metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+        return nil
+    }
+
+    // Resource takes an unqualified resource and returns a Group qualified GroupResource
+    func Resource(resource string) schema.GroupResource {
+        return SchemeGroupVersion.WithResource(resource).GroupResource()
+    }
+
+
+
+v1beta1:
+
+types.go:
+
+    package v1beta1
+
+    import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+    // +genclient
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // Foo specifies an offered Foo with toppings.
+    type Foo struct {
+        metav1.TypeMeta   `json:",inline"`
+        metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+        Spec              FooSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+        Status            FooStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+    }
+
+    type FooSpec struct {
+        // toppings is a list of Topping names. They don't have to be unique. Order does not matter.
+        Bar []FooBar `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+    }
+
+    type FooBar struct {
+        // name is the name of a Bar object .
+        Name string `json:"name" protobuf:"bytes,1,name=name"`
+        // quantity is the number of how often the topping is put onto the Foo.
+        // +optional
+        Quantity int `json:"quantity" protobuf:"bytes,2,opt,name=quantity"`
+    }
+
+    type FooStatus struct {
+        // cost is the cost of the whole Foo including all bars.
+        Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
+    }
+
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // FooList is a list of Foo objects.
+    type FooList struct {
+        metav1.TypeMeta `json:",inline"`
+        metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+        Items []Foo `json:"items" protobuf:"bytes,2,rep,name=items"`
+    }
+
+
+register.go
+
+    package v1beta1
+
+    import (
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apimachinery/pkg/runtime/schema"
+    )
+
+    // GroupName holds the API group name.
+    const GroupName = "restaurant.programming-kubernetes.info"
+
+    // SchemeGroupVersion is group version used to register these objects
+    var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1beta1"}
+
+    var (
+        // SchemeBuilder allows to add this group to a scheme.
+        // TODO: move SchemeBuilder with zz_generated.deepcopy.go to k8s.io/api.
+        // localSchemeBuilder and AddToScheme will stay in k8s.io/kubernetes.
+        SchemeBuilder      runtime.SchemeBuilder
+        localSchemeBuilder = &SchemeBuilder
+
+        // AddToScheme adds this group to a scheme.
+        AddToScheme = localSchemeBuilder.AddToScheme
+    )
+
+    func init() {
+        // We only register manually written functions here. The registration of the
+        // generated functions takes place in the generated files. The separation
+        // makes the code compile even when the generated files are missing.
+	    localSchemeBuilder.Register(addKnownTypes, addDefaultingFuncs)
+    }
+
+    // Adds the list of known types to the given scheme.
+    func addKnownTypes(scheme *runtime.Scheme) error {
+        scheme.AddKnownTypes(SchemeGroupVersion,
+            &Foo{},
+            &FooList{},
+        )
+        metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+        return nil
+    }
+
+    // Resource takes an unqualified resource and returns a Group qualified GroupResource
+    func Resource(resource string) schema.GroupResource {
+        return SchemeGroupVersion.WithResource(resource).GroupResource()
+    }
+
+
+
+
+internal:
+types.go:
+
+    package restaurant
+
+    import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+    // +genclient
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // Foo specifies an offered pizza with toppings.
+    type Foo struct {
+        metav1.TypeMeta
+        metav1.ObjectMeta
+
+        Spec   FooSpec
+        Status FooStatus
+    }
+
+    type FooSpec struct {
+        // +k8s:conversion-gen=false
+        // toppings is a list of Bar names. They don't have to be unique. Order does not matter.
+        Bar []FooBar
+    }
+
+    type FooBar struct {
+        // name is the name of a Bar object .
+        Name string
+        // quantity is the number of how often the topping is put onto the pizza.
+        Quantity int
+    }
+
+    type FooStatus struct {
+        // cost is the cost of the whole pizza including all toppings.
+        Cost float64
+    }
+
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // FooList is a list of Foo objects.
+    type FooList struct {
+        metav1.TypeMeta
+        metav1.ListMeta
+
+        Items []Foo
+    }
+
+    // +genclient
+    // +genclient:nonNamespaced
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // Bar is a topping put onto a pizza.
+    type Bar struct {
+        metav1.TypeMeta
+        metav1.ObjectMeta
+
+        Spec BarSpec
+    }
+
+    type BarSpec struct {
+        // cost is the cost of one instance of this topping.
+        Cost float64
+    }
+
+    // +genclient:nonNamespaced
+    // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+    // BarList is a list of Bar objects.
+    type BarList struct {
+        metav1.TypeMeta
+        metav1.ListMeta
+
+        // Items is a list of Bars
+        Items []Bar
+    }
+
+register.go:
+
+    package restaurant
+
+    import (
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apimachinery/pkg/runtime/schema"
+    )
+
+    const GroupName = "restaurant.programming-kubernetes.info"
+
+    // SchemeGroupVersion is group version used to register these objects
+    var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: runtime.APIVersionInternal}
+
+    // Kind takes an unqualified kind and returns back a Group qualified GroupKind
+    func Kind(kind string) schema.GroupKind {
+        return SchemeGroupVersion.WithKind(kind).GroupKind()
+    }
+
+    // Resource takes an unqualified resource and returns back a Group qualified GroupResource
+    func Resource(resource string) schema.GroupResource {
+        return SchemeGroupVersion.WithResource(resource).GroupResource()
+    }
+
+    var (
+        SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+        AddToScheme   = SchemeBuilder.AddToScheme
+    )
+
+    // Adds the list of known types to the given scheme.
+    func addKnownTypes(scheme *runtime.Scheme) error {
+        scheme.AddKnownTypes(SchemeGroupVersion,
+            &Foo{},
+            &FooList{},
+        )
+        return nil
+    }
+
+
 # Conversions
 
 The codedegen already setup a bunch of convertors and the init function, you can see it in "zz_generated.conversions.go". But if you notice it, we setup a	// +k8s:conversion-gen=false in some types, this is because we dont wait for the codegen to generate a conversion funtion for those types, you can remove this tag ant try it, you can see that an syntax error will arrive at the zz_generated.conversion.go, making impossible for us to compile the code, this is bacause the conversos is limited in what it can do, to overcome this, wee are gonna set our custom conversion function, in the v1alpha1/conversion.go we are gonne to set the following funtions:
@@ -678,3 +1009,555 @@ The codedegen already setup a bunch of convertors and the init function, you can
 Those are custom converters.
 
 After adding all those converters, delete the old generated code, and run the codegen again.
+
+
+## Defaultings
+
+To set the default types, you may have notice it that that the init func on
+the register.go have the following line: 
+
+    	localSchemeBuilder.Register(addKnownTypes, addDefaultingFuncs)
+
+this register the addDefautingFuncs, this method is defined under the defaults.go file. See the following examples:
+
+v1alpha1:
+
+    package v1alpha1
+
+    import (
+        "k8s.io/apimachinery/pkg/runtime"
+    )
+
+    func addDefaultingFuncs(scheme *runtime.Scheme) error {
+        return RegisterDefaults(scheme)
+    }
+
+    func SetDefaults_FooSpec(obj *FooSpec) {
+        if len(obj.Bar) == 0 {
+            obj.Bar = []string{"foo0", "foo1", "foo2"}
+        }
+    }
+
+v1beta1:
+
+    package v1beta1
+
+    import "k8s.io/apimachinery/pkg/runtime"
+
+    func addDefaultingFuncs(scheme *runtime.Scheme) error {
+        return RegisterDefaults(scheme)
+    }
+
+    func SetDefaults_FooSpec(obj *FooSpec) {
+        if len(obj.Bar) == 0 {
+            obj.Bar = []FooBar{
+                {"foo0", 1},
+                {"foo1", 1},
+                {"foo2", 1},
+            }
+        }
+
+        for i := range obj.Bar {
+            if obj.Bar[i].Quantity == 0 {
+                obj.Bar[i].Quantity = 1
+            }
+        }
+    }
+
+
+You can define default by following the pattern func SetDefaults_<KIND>(obj *<KIND>)
+
+## Validation
+
+Validation functions are traditionally placed in pkg/apis/<group>/validation, you should follow the patter Validate<KIND> for the functions names, a valid validation package for our types could be:
+
+
+    package validation
+
+    import (
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+        "k8s.io/apimachinery/pkg/util/validation/field"
+    )
+
+    func ValidateFoo(f *restaurant.Foo) field.ErrorList {
+        allErrs := field.ErrorList{}
+
+        allErrs = append(allErrs, ValidateFooSpec(&f.Spec, field.NewPath("spec"))...)
+
+        return allErrs
+    }
+
+    func ValidateFooSpec(s *restaurant.FooSpec, fldPath *field.Path) field.ErrorList {
+        allErrs := field.ErrorList{}
+
+        prevNames := map[string]bool{}
+        for i := range s.Bar {
+            if s.Bar[i].Quantity <= 0 {
+                allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("quantity"), s.Bar[i].Quantity, "cannot be negative or zero"))
+            }
+            if len(s.Bar[i].Name) == 0 {
+                allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("name"), s.Bar[i].Name, "cannot be empty"))
+            } else {
+                if prevNames[s.Bar[i].Name] {
+                    allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("name"), s.Bar[i].Name, "must be unique"))
+                }
+                prevNames[s.Bar[i].Name] = true
+            }
+        }
+
+        return allErrs
+    }
+
+
+done, now validation is working!
+
+# Registry and Strategy
+
+Defining types by itself isnt very usefull, now we gonna to implement some REST logic for those types.
+
+
+We need to create our registry first, so under /pkg/registry create a registry.go and paste this there:
+
+
+    package registry
+
+    import (
+        "fmt"
+
+        genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
+        "k8s.io/apiserver/pkg/registry/rest"
+    )
+
+    // REST implements a RESTStorage for API services against etcd
+    type REST struct {
+        *genericregistry.Store
+    }
+
+    // RESTInPeace is just a simple function that panics on error.
+    // Otherwise returns the given storage object. It is meant to be
+    // a wrapper for custom registries.
+    func RESTInPeace(storage rest.StandardStorage, err error) rest.StandardStorage {
+        if err != nil {
+            err = fmt.Errorf("unable to create REST storage for a resource due to %v, will die", err)
+            panic(err)
+        }
+        return storage
+    }
+
+This is a generic registry, now we need to define our strategys.
+
+Under pkg/registry/<group>/foo/strategy.go:
+
+    package foo
+
+    import (
+        "context"
+        "fmt"
+
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant/validation"
+
+        "k8s.io/apimachinery/pkg/fields"
+        "k8s.io/apimachinery/pkg/labels"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apimachinery/pkg/util/validation/field"
+        "k8s.io/apiserver/pkg/registry/generic"
+        "k8s.io/apiserver/pkg/storage"
+        "k8s.io/apiserver/pkg/storage/names"
+    )
+
+    // NewStrategy creates and returns a fooStrategy instance
+    func NewStrategy(typer runtime.ObjectTyper) fooStrategy {
+        return fooStrategy{typer, names.SimpleNameGenerator}
+    }
+
+    // GetAttrs returns labels.Set, fields.Set, the presence of Initializers if any
+    // and error in case the given runtime.Object is not a Foo
+    func GetAttrs(obj runtime.Object) (labels.Set, fields.Set, error) {
+        apiserver, ok := obj.(*restaurant.Foo)
+        if !ok {
+            return nil, nil, fmt.Errorf("given object is not a Foo")
+        }
+        return labels.Set(apiserver.ObjectMeta.Labels), SelectableFields(apiserver), nil
+    }
+
+    // MatchFoo is the filter used by the generic etcd backend to watch events
+    // from etcd to clients of the apiserver only interested in specific labels/fields.
+    func MatchFoo(label labels.Selector, field fields.Selector) storage.SelectionPredicate {
+        return storage.SelectionPredicate{
+            Label:    label,
+            Field:    field,
+            GetAttrs: GetAttrs,
+        }
+    }
+
+    // SelectableFields returns a field set that represents the object.
+    func SelectableFields(obj *restaurant.Foo) fields.Set {
+        return generic.ObjectMetaFieldsSet(&obj.ObjectMeta, true)
+    }
+
+    type fooStrategy struct {
+        runtime.ObjectTyper
+        names.NameGenerator
+    }
+
+    func (fooStrategy) NamespaceScoped() bool {
+        return true
+    }
+
+    func (fooStrategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+    }
+
+    func (fooStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+    }
+
+    // Here is where we actually use the Validate Function defined in the api
+    func (fooStrategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+        pizza := obj.(*restaurant.Foo)
+        // Notice that we use our validation method here
+        return validation.ValidateFoo(pizza)
+    }
+
+    func (fooStrategy) AllowCreateOnUpdate() bool {
+        return false
+    }
+
+    func (fooStrategy) AllowUnconditionalUpdate() bool {
+        return false
+    }
+
+    func (fooStrategy) Canonicalize(obj runtime.Object) {
+    }
+
+    func (fooStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+        return field.ErrorList{}
+    }
+
+
+Under pkg/registry/<group>/foo/etcd.go:
+
+    package foo
+
+    import (
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+        "github.com/marcos30004347/kubeapi/pkg/registry"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apiserver/pkg/registry/generic"
+        genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
+    )
+
+    // NewREST returns a RESTStorage object that will work against API services.
+    func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*registry.REST, error) {
+        strategy := NewStrategy(scheme)
+
+        store := &genericregistry.Store{
+            NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
+            NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
+            PredicateFunc:            MatchFoo,
+            DefaultQualifiedResource: restaurant.Resource("pizzas"),
+
+            CreateStrategy: strategy,
+            UpdateStrategy: strategy,
+            DeleteStrategy: strategy,
+        }
+        options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
+        if err := store.CompleteWithOptions(options); err != nil {
+            return nil, err
+        }
+        return &registry.REST{store}, nil
+    }
+
+
+Under pkg/registry/<group>/bar/strategy.go:
+
+    package bar
+
+    import (
+        "context"
+        "fmt"
+
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+
+        "k8s.io/apimachinery/pkg/fields"
+        "k8s.io/apimachinery/pkg/labels"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apimachinery/pkg/util/validation/field"
+        "k8s.io/apiserver/pkg/registry/generic"
+        "k8s.io/apiserver/pkg/storage"
+        "k8s.io/apiserver/pkg/storage/names"
+    )
+
+    // NewStrategy creates and returns a barStrategy instance
+    func NewStrategy(typer runtime.ObjectTyper) barStrategy {
+        return barStrategy{typer, names.SimpleNameGenerator}
+    }
+
+    // GetAttrs returns labels.Set, fields.Set, the presence of Initializers if any
+    // and error in case the given runtime.Object is not a Bar
+    func GetAttrs(obj runtime.Object) (labels.Set, fields.Set, error) {
+        apiserver, ok := obj.(*restaurant.Bar)
+        if !ok {
+            return nil, nil, fmt.Errorf("given object is not a Bar")
+        }
+        return labels.Set(apiserver.ObjectMeta.Labels), SelectableFields(apiserver), nil
+    }
+
+    // MatchBar is the filter used by the generic etcd backend to watch events
+    // from etcd to clients of the apiserver only interested in specific labels/fields.
+    func MatchBar(label labels.Selector, field fields.Selector) storage.SelectionPredicate {
+        return storage.SelectionPredicate{
+            Label:    label,
+            Field:    field,
+            GetAttrs: GetAttrs,
+        }
+    }
+
+    // SelectableFields returns a field set that represents the object.
+    func SelectableFields(obj *restaurant.Bar) fields.Set {
+        return generic.ObjectMetaFieldsSet(&obj.ObjectMeta, true)
+    }
+
+    type barStrategy struct {
+        runtime.ObjectTyper
+        names.NameGenerator
+    }
+
+    func (barStrategy) NamespaceScoped() bool {
+        return true
+    }
+
+    func (barStrategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+    }
+
+    func (barStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+    }
+
+    // Here is where we actually use the Validate Function defined in the api
+    func (barStrategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+        return field.ErrorList{}
+
+    }
+
+    func (barStrategy) AllowCreateOnUpdate() bool {
+        return false
+    }
+
+    func (barStrategy) AllowUnconditionalUpdate() bool {
+        return false
+    }
+
+    func (barStrategy) Canonicalize(obj runtime.Object) {
+    }
+
+    func (barStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+        return field.ErrorList{}
+    }
+
+
+Under pkg/registry/<group>/bar/etcd.go:
+
+    package bar
+
+    import (
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+        "github.com/marcos30004347/kubeapi/pkg/registry"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/apiserver/pkg/registry/generic"
+        genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
+    )
+
+    // NewREST returns a RESTStorage object that will work against API services.
+    func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*registry.REST, error) {
+        strategy := NewStrategy(scheme)
+
+        store := &genericregistry.Store{
+            NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
+            NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
+            PredicateFunc:            MatchBar,
+            DefaultQualifiedResource: restaurant.Resource("bars"),
+
+            CreateStrategy: strategy,
+            UpdateStrategy: strategy,
+            DeleteStrategy: strategy,
+        }
+        options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
+        if err := store.CompleteWithOptions(options); err != nil {
+            return nil, err
+        }
+        return &registry.REST{store}, nil
+    }
+
+Now we got to install ours strategys and registrys, this can be done in the apiserver.go
+
+add the imports
+
+	"k8s.io/apiserver/pkg/registry/rest"
+
+	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+	customregistry "github.com/marcos30004347/kubeapi/pkg/registry"
+	barstorage "github.com/marcos30004347/kubeapi/pkg/registry/restaurant/bar"
+	foostorage "github.com/marcos30004347/kubeapi/pkg/registry/restaurant/foo"
+
+
+in the New Function, add this after creating the CustomServer
+
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(restaurant.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+
+	v1alpha1storage := map[string]rest.Storage{}
+	v1alpha1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	v1alpha1storage["toppings"] = customregistry.RESTInPeace(barstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
+
+	v1beta1storage := map[string]rest.Storage{}
+	v1beta1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	apiGroupInfo.VersionedResourcesStorageMap["v1beta1"] = v1beta1storage
+
+	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
+		return nil, err
+	}
+
+
+## Admission
+
+now we gotta to create the admission type under pkg/admission/, we gonna create the foobar plugin and custominitializer.
+
+
+pkg/admisiion/custominitializer/interfaces.go:
+
+    package custominitializer
+
+    import (
+        "k8s.io/apiserver/pkg/admission"
+
+        informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
+    )
+
+    // WantsRestaurantInformerFactory defines a function which sets InformerFactory for admission plugins that need it
+    type WantsRestaurantInformerFactory interface {
+        SetRestaurantInformerFactory(informers.SharedInformerFactory)
+        admission.InitializationValidator
+    }
+
+pkg/admisiion/custominitializer/restaurantinformer.go:
+
+    package custominitializer
+
+    import (
+        "k8s.io/apiserver/pkg/admission"
+
+        informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
+    )
+
+    type restaurantInformerPluginInitializer struct {
+        informers informers.SharedInformerFactory
+    }
+
+    var _ admission.PluginInitializer = restaurantInformerPluginInitializer{}
+
+    // New creates an instance of custom admission plugins initializer.
+    func New(informers informers.SharedInformerFactory) restaurantInformerPluginInitializer {
+        return restaurantInformerPluginInitializer{
+            informers: informers,
+        }
+    }
+
+    // Initialize checks the initialization interfaces implemented by a plugin
+    // and provide the appropriate initialization data
+    func (i restaurantInformerPluginInitializer) Initialize(plugin admission.Interface) {
+        if wants, ok := plugin.(WantsRestaurantInformerFactory); ok {
+            wants.SetRestaurantInformerFactory(i.informers)
+        }
+    }
+
+
+pkg/admisiion/plugin/foobar/admission.go:
+
+    package foobar
+
+    import (
+        "fmt"
+        "io"
+
+        "k8s.io/apimachinery/pkg/api/errors"
+        "k8s.io/apiserver/pkg/admission"
+
+        "github.com/marcos30004347/kubeapi/pkg/admission/custominitializer"
+        "github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+        informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
+        listers "github.com/marcos30004347/kubeapi/pkg/generated/listers/restaurant/v1alpha1"
+    )
+
+    // Register registers a plugin
+    func Register(plugins *admission.Plugins) {
+        plugins.Register("FooBar", func(config io.Reader) (admission.Interface, error) {
+            return New()
+        })
+    }
+
+    type FooBarPlugin struct {
+        *admission.Handler
+        toppingLister listers.BarLister
+    }
+
+    var _ = custominitializer.WantsRestaurantInformerFactory(&FooBarPlugin{})
+
+    // Admit ensures that the object in-flight is of kind Foo.
+    // In addition checks that the toppings are known.
+    func (d *FooBarPlugin) Validate(a admission.Attributes, _ admission.ObjectInterfaces) error {
+        // we are only interested in pizzas
+        if a.GetKind().GroupKind() != restaurant.Kind("Foo") {
+            return nil
+        }
+
+        if !d.WaitForReady() {
+            return admission.NewForbidden(a, fmt.Errorf("not yet ready to handle request"))
+        }
+
+        obj := a.GetObject()
+        pizza := obj.(*restaurant.Foo)
+        for _, top := range pizza.Spec.Bar {
+            if _, err := d.toppingLister.Get(top.Name); err != nil && errors.IsNotFound(err) {
+                return admission.NewForbidden(
+                    a,
+                    fmt.Errorf("unknown topping: %s", top.Name),
+                )
+            }
+        }
+
+        return nil
+    }
+
+    // SetRestaurantInformerFactory gets Lister from SharedInformerFactory.
+    // The lister knows how to lists Bar.
+    func (d *FooBarPlugin) SetRestaurantInformerFactory(f informers.SharedInformerFactory) {
+        d.toppingLister = f.Restaurant().V1alpha1().Bars().Lister()
+        d.SetReadyFunc(f.Restaurant().V1alpha1().Bars().Informer().HasSynced)
+    }
+
+    // ValidaValidateInitializationte checks whether the plugin was correctly initialized.
+    func (d *FooBarPlugin) ValidateInitialization() error {
+        if d.toppingLister == nil {
+            return fmt.Errorf("missing policy lister")
+        }
+        return nil
+    }
+
+    // New creates a new ban pizza topping admission plugin
+    func New() (*FooBarPlugin, error) {
+        return &FooBarPlugin{
+            Handler: admission.NewHandler(admission.Create, admission.Update),
+        }, nil
+    }
+
+
+after adding that code you should go to the pkg/cmd/server/start.go and define the Complete Method, previous just returnin nil, as:
+
+    func (o *CustomServerOptions) Complete() error {
+        // register admission plugins
+        foobar.Register(o.RecommendedOptions.Admission.Plugins)
+
+        // add admisison plugins to the RecommendedPluginOrder
+        o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "PizzaToppings")
+
+        return nil
+    }
