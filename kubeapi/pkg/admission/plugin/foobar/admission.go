@@ -1,6 +1,7 @@
 package foobar
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -29,7 +30,7 @@ var _ = custominitializer.WantsRestaurantInformerFactory(&FooBarPlugin{})
 
 // Admit ensures that the object in-flight is of kind Foo.
 // In addition checks that the toppings are known.
-func (d *FooBarPlugin) Validate(a admission.Attributes, _ admission.ObjectInterfaces) error {
+func (d *FooBarPlugin) Admit(ctx context.Context, a admission.Attributes, _ admission.ObjectInterfaces) error {
 	// we are only interested in pizzas
 	if a.GetKind().GroupKind() != restaurant.Kind("Foo") {
 		return nil
@@ -40,8 +41,8 @@ func (d *FooBarPlugin) Validate(a admission.Attributes, _ admission.ObjectInterf
 	}
 
 	obj := a.GetObject()
-	pizza := obj.(*restaurant.Foo)
-	for _, top := range pizza.Spec.Bar {
+	foo := obj.(*restaurant.Foo)
+	for _, top := range foo.Spec.Bar {
 		if _, err := d.barLister.Get(top.Name); err != nil && errors.IsNotFound(err) {
 			return admission.NewForbidden(
 				a,
@@ -68,7 +69,7 @@ func (d *FooBarPlugin) ValidateInitialization() error {
 	return nil
 }
 
-// New creates a new ban pizza topping admission plugin
+// New creates a new ban foo topping admission plugin
 func New() (*FooBarPlugin, error) {
 	return &FooBarPlugin{
 		Handler: admission.NewHandler(admission.Create, admission.Update),

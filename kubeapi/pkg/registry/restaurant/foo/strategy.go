@@ -1,5 +1,3 @@
-package foo
-
 // type RESTCreateStrategy interface {
 //     runtime.ObjectTyper
 //     // The name generator is used when the standard GenerateName field is set.
@@ -31,6 +29,8 @@ package foo
 //     // empty method.
 //     Canonicalize(obj runtime.Object)
 // }
+
+package foo
 
 import (
 	"context"
@@ -95,8 +95,8 @@ func (fooStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object
 
 // Here is where we actually use the Validate Function defined in the api
 func (fooStrategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	pizza := obj.(*restaurant.Foo)
-	return validation.ValidateFoo(pizza)
+	foo := obj.(*restaurant.Foo)
+	return validation.ValidateFoo(foo)
 }
 
 func (fooStrategy) AllowCreateOnUpdate() bool {

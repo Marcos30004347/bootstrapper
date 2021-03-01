@@ -643,7 +643,7 @@ types.go:
     // +genclient
     // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-    // Foo specifies an offered Foo with bars.
+    // Foo specifies an offered Foo with bar.
     type Foo struct {
         metav1.TypeMeta   `json:",inline"`
         metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
@@ -654,12 +654,12 @@ types.go:
 
     type FooSpec struct {
         // +k8s:conversion-gen=false
-        // bars is a list of Bar names. They don't have to be unique. Order does not matter.
-        Bar []string `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+        // bar is a list of Bar names. They don't have to be unique. Order does not matter.
+        Bar []string `json:"bar" protobuf:"bytes,1,rep,name=bar"`
     }
 
     type FooStatus struct {
-        // cost is the cost of the whole Foo including all bars.
+        // cost is the cost of the whole Foo including all bar.
         Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
     }
 
@@ -771,7 +771,7 @@ types.go:
 
     type FooSpec struct {
         // toppings is a list of Topping names. They don't have to be unique. Order does not matter.
-        Bar []FooBar `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+        Bar []FooBar `json:"bar" protobuf:"bytes,1,rep,name=bar"`
     }
 
     type FooBar struct {
@@ -783,7 +783,7 @@ types.go:
     }
 
     type FooStatus struct {
-        // cost is the cost of the whole Foo including all bars.
+        // cost is the cost of the whole Foo including all bar.
         Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
     }
 
@@ -1093,13 +1093,13 @@ Validation functions are traditionally placed in pkg/apis/<group>/validation, yo
         prevNames := map[string]bool{}
         for i := range s.Bar {
             if s.Bar[i].Quantity <= 0 {
-                allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("quantity"), s.Bar[i].Quantity, "cannot be negative or zero"))
+                allErrs = append(allErrs, field.Invalid(fldPath.Child("bar").Index(i).Child("quantity"), s.Bar[i].Quantity, "cannot be negative or zero"))
             }
             if len(s.Bar[i].Name) == 0 {
-                allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("name"), s.Bar[i].Name, "cannot be empty"))
+                allErrs = append(allErrs, field.Invalid(fldPath.Child("bar").Index(i).Child("name"), s.Bar[i].Name, "cannot be empty"))
             } else {
                 if prevNames[s.Bar[i].Name] {
-                    allErrs = append(allErrs, field.Invalid(fldPath.Child("bars").Index(i).Child("name"), s.Bar[i].Name, "must be unique"))
+                    allErrs = append(allErrs, field.Invalid(fldPath.Child("bar").Index(i).Child("name"), s.Bar[i].Name, "must be unique"))
                 }
                 prevNames[s.Bar[i].Name] = true
             }
@@ -1374,7 +1374,7 @@ Under pkg/registry/<group>/bar/etcd.go:
             NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
             NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
             PredicateFunc:            MatchBar,
-            DefaultQualifiedResource: restaurant.Resource("bars"),
+            DefaultQualifiedResource: restaurant.Resource("bar"),
 
             CreateStrategy: strategy,
             UpdateStrategy: strategy,
@@ -1557,7 +1557,47 @@ after adding that code you should go to the pkg/cmd/server/start.go and define t
         foobar.Register(o.RecommendedOptions.Admission.Plugins)
 
         // add admisison plugins to the RecommendedPluginOrder
-        o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "PizzaToppings")
+        o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "FooBar")
 
         return nil
+    }
+
+
+
+    func (o *CustomServerOptions) Config() (*apiserver.Config, error) {
+        // Tell the recomended options to create a signed certificate if user did not specify it in the flag options
+        if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
+            return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
+        }
+        // Here is the setup for the client and informers
+        o.RecommendedOptions.ExtraAdmissionInitializers = func(c *genericapiserver.RecommendedConfig) ([]admission.PluginInitializer, error) {
+            client, err := clientset.NewForConfig(c.LoopbackClientConfig)
+            if err != nil {
+                return nil, err
+            }
+            informerFactory := informers.NewSharedInformerFactory(client, c.LoopbackClientConfig.Timeout)
+            o.SharedInformerFactory = informerFactory
+            return []admission.PluginInitializer{custominitializer.New(informerFactory)}, nil
+        }
+
+        // Instantiate the default recommended configuration
+        serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
+
+        serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(sampleopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(apiserver.Scheme))
+        serverConfig.OpenAPIConfig.Info.Title = "Restaurant"
+        serverConfig.OpenAPIConfig.Info.Version = "0.1"
+
+        // Change the default according to flags and other customized options
+        err := o.RecommendedOptions.ApplyTo(serverConfig)
+
+        if err != nil {
+            return nil, err
+        }
+
+        config := &apiserver.Config{
+            GenericConfig: serverConfig,
+            ExtraConfig:   apiserver.ExtraConfig{},
+        }
+
+        return config, nil
     }

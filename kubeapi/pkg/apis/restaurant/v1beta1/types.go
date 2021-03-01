@@ -4,6 +4,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
 
 // Foo specifies an offered Foo with toppings.
 type Foo struct {
@@ -15,7 +16,9 @@ type Foo struct {
 
 type FooSpec struct {
 	// toppings is a list of Topping names. They don't have to be unique. Order does not matter.
-	Bar []FooBar `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+
+	// +listType=set
+	Bar []FooBar `json:"bar" protobuf:"bytes,1,rep,name=bar"`
 }
 
 type FooBar struct {
@@ -27,7 +30,7 @@ type FooBar struct {
 }
 
 type FooStatus struct {
-	// cost is the cost of the whole Foo including all bars.
+	// cost is the cost of the whole Foo including all bar.
 	Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
 }
 

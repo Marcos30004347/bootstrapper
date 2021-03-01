@@ -5,7 +5,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Foo specifies an offered Foo with bars.
+// Foo specifies an offered Foo with bar.
 type Foo struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
@@ -16,12 +16,12 @@ type Foo struct {
 
 type FooSpec struct {
 	// +k8s:conversion-gen=false
-	// bars is a list of Bar names. They don't have to be unique. Order does not matter.
-	Bar []string `json:"bars" protobuf:"bytes,1,rep,name=bars"`
+	// bar is a list of Bar names. They don't have to be unique. Order does not matter.
+	Bar []string `json:"bar" protobuf:"bytes,1,rep,name=bar"`
 }
 
 type FooStatus struct {
-	// cost is the cost of the whole Foo including all bars.
+	// cost is the cost of the whole Foo including all bar.
 	Cost float64 `json:"cost,omitempty" protobuf:"bytes,1,opt,name=cost"`
 }
 

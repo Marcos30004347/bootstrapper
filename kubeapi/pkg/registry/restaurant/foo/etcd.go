@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/registry/generic"
 	genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
+	"k8s.io/apiserver/pkg/registry/rest"
 )
 
 // NewREST returns a RESTStorage object that will work against API services.
@@ -16,12 +17,15 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 		NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
 		NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
 		PredicateFunc:            MatchFoo,
-		DefaultQualifiedResource: restaurant.Resource("pizzas"),
+		DefaultQualifiedResource: restaurant.Resource("foos"),
 
 		CreateStrategy: strategy,
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
+
+		TableConvertor: rest.NewDefaultTableConvertor(restaurant.Resource("foos")),
 	}
+
 	options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
 	if err := store.CompleteWithOptions(options); err != nil {
 		return nil, err

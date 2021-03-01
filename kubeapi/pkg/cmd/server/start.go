@@ -9,6 +9,7 @@ import (
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 
+	"github.com/marcos30004347/kubeapi/pkg/admission/custominitializer"
 	"github.com/marcos30004347/kubeapi/pkg/admission/plugin/foobar"
 	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant/v1alpha1"
 	"github.com/marcos30004347/kubeapi/pkg/apiserver"
@@ -20,10 +21,8 @@ import (
 	informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
 
 	"k8s.io/apiserver/pkg/admission"
-	"k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	serveroptions "k8s.io/apiserver/pkg/server/options"
-	sampleopenapi "k8s.io/sample-apiserver/pkg/generated/openapi"
 )
 
 const defaultEtcdPathPrefix = "/registry/restaurant.info"
@@ -93,15 +92,15 @@ func (o *CustomServerOptions) Config() (*apiserver.Config, error) {
 		}
 		informerFactory := informers.NewSharedInformerFactory(client, c.LoopbackClientConfig.Timeout)
 		o.SharedInformerFactory = informerFactory
-		return []admission.PluginInitializer{}, nil
+		return []admission.PluginInitializer{custominitializer.New(informerFactory)}, nil
 	}
 
 	// Instantiate the default recommended configuration
 	serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
 
-	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(sampleopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(apiserver.Scheme))
-	serverConfig.OpenAPIConfig.Info.Title = "Restaurant"
-	serverConfig.OpenAPIConfig.Info.Version = "0.1"
+	// serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(sampleopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(apiserver.Scheme))
+	// serverConfig.OpenAPIConfig.Info.Title = "Restaurant"
+	// serverConfig.OpenAPIConfig.Info.Version = "0.1"
 
 	// Change the default according to flags and other customized options
 	err := o.RecommendedOptions.ApplyTo(serverConfig)
@@ -149,7 +148,7 @@ func (o *CustomServerOptions) Complete() error {
 	foobar.Register(o.RecommendedOptions.Admission.Plugins)
 
 	// add admisison plugins to the RecommendedPluginOrder
-	o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "PizzaToppings")
+	o.RecommendedOptions.Admission.RecommendedPluginOrder = append(o.RecommendedOptions.Admission.RecommendedPluginOrder, "FooBar")
 
 	return nil
 }
