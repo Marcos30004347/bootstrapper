@@ -7,7 +7,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
 	"github.com/marcos30004347/kubeapi/pkg/admission/custominitializer"
 	"github.com/marcos30004347/kubeapi/pkg/admission/plugin/foobar"
@@ -21,6 +24,7 @@ import (
 	informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
 
 	"k8s.io/apiserver/pkg/admission"
+	"k8s.io/apiserver/pkg/features"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	serveroptions "k8s.io/apiserver/pkg/server/options"
 )
@@ -45,6 +49,8 @@ func NewCustomServerOptions(out, errOut io.Writer) *CustomServerOptions {
 		StdOut: out,
 		StdErr: errOut,
 	}
+
+	o.RecommendedOptions.Etcd.StorageConfig.EncodeVersioner = runtime.NewMultiGroupVersioner(v1alpha1.SchemeGroupVersion, schema.GroupKind{Group: v1alpha1.GroupName})
 
 	return o
 }
@@ -75,6 +81,7 @@ func NewCommandStartCustomServer(
 
 	flags := cmd.Flags()
 	o.RecommendedOptions.AddFlags(flags)
+	utilfeature.DefaultMutableFeatureGate.AddFlag(flags)
 
 	return cmd
 }
@@ -84,6 +91,9 @@ func (o *CustomServerOptions) Config() (*apiserver.Config, error) {
 	if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
 	}
+
+	o.RecommendedOptions.Etcd.StorageConfig.Paging = utilfeature.DefaultFeatureGate.Enabled(features.APIListChunking)
+
 	// Here is the setup for the client and informers
 	o.RecommendedOptions.ExtraAdmissionInitializers = func(c *genericapiserver.RecommendedConfig) ([]admission.PluginInitializer, error) {
 		client, err := clientset.NewForConfig(c.LoopbackClientConfig)

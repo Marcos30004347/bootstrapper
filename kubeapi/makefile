@@ -13,6 +13,6 @@ run:
 
 
 deploy: build
-	kind load docker-image marcos30004347/kubeapi:latest
+	eval $(minikube docker-env)
 	kubectl apply -f ./k8s/ns.yaml
 	kubectl apply -f ./k8s/

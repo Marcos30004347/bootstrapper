@@ -19,18 +19,19 @@ import (
 )
 
 var (
+	// Scheme defines methods for serializing and deserializing API objects.
 	Scheme = runtime.NewScheme()
+
+	// Codecs provides methods for retrieving codecs and serializers for specific
+	// versions and content types.
 	Codecs = serializer.NewCodecFactory(Scheme)
 )
 
 func init() {
 	install.Install(Scheme)
 
-	// we need to add the options to empty v1
-	// TODO fix the server code to avoid this
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 
-	// TODO: keep the generic API server from wanting this
 	unversioned := schema.GroupVersion{Group: "", Version: "v1"}
 	Scheme.AddUnversionedTypes(unversioned,
 		&metav1.Status{},
@@ -81,10 +82,7 @@ func (cfg *Config) Complete() CompletedConfig {
 }
 
 func (c CompletedConfig) New() (*CustomServer, error) {
-	genericServer, err := c.GenericConfig.New(
-		"custom-apiserver",
-		genericapiserver.NewEmptyDelegate(),
-	)
+	genericServer, err := c.GenericConfig.New("kubeapi", genericapiserver.NewEmptyDelegate())
 
 	if err != nil {
 		return nil, err
@@ -98,13 +96,13 @@ func (c CompletedConfig) New() (*CustomServer, error) {
 
 	v1alpha1storage := map[string]rest.Storage{}
 	// NewREST from the registry/etcd.go
-	v1alpha1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
-	v1alpha1storage["toppings"] = customregistry.RESTInPeace(barstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	v1alpha1storage["foos"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	v1alpha1storage["bars"] = customregistry.RESTInPeace(barstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 	// NewREST from the registry/etcd.go
 	v1beta1storage := map[string]rest.Storage{}
-	v1beta1storage["foo"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+	v1beta1storage["foos"] = customregistry.RESTInPeace(foostorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 	apiGroupInfo.VersionedResourcesStorageMap["v1beta1"] = v1beta1storage
 
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {

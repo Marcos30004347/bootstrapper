@@ -17,13 +17,13 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 		NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
 		NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
 		PredicateFunc:            MatchBar,
-		DefaultQualifiedResource: restaurant.Resource("bar"),
+		DefaultQualifiedResource: restaurant.Resource("bars"),
 
 		CreateStrategy: strategy,
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
 
-		TableConvertor: rest.NewDefaultTableConvertor(restaurant.Resource("bar")),
+		TableConvertor: rest.NewDefaultTableConvertor(restaurant.Resource("bars")),
 	}
 	options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
 	if err := store.CompleteWithOptions(options); err != nil {
