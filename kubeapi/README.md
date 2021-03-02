@@ -1519,7 +1519,7 @@ pkg/admisiion/plugin/foobar/admission.go:
             if _, err := d.toppingLister.Get(top.Name); err != nil && errors.IsNotFound(err) {
                 return admission.NewForbidden(
                     a,
-                    fmt.Errorf("unknown topping: %s", top.Name),
+                    fmt.Errorf("unknown bar: %s", top.Name),
                 )
             }
         }

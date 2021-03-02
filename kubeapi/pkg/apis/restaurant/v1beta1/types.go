@@ -15,7 +15,7 @@ type Foo struct {
 }
 
 type FooSpec struct {
-	// toppings is a list of Topping names. They don't have to be unique. Order does not matter.
+	// bar is a list of Bars names. They don't have to be unique. Order does not matter.
 
 	// +listType=set
 	Bar []FooBar `json:"bar" protobuf:"bytes,1,rep,name=bar"`

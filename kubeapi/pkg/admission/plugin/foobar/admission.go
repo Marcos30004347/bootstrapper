@@ -29,9 +29,8 @@ type FooBarPlugin struct {
 var _ = custominitializer.WantsRestaurantInformerFactory(&FooBarPlugin{})
 
 // Admit ensures that the object in-flight is of kind Foo.
-// In addition checks that the toppings are known.
+// In addition checks that the bar are known.
 func (d *FooBarPlugin) Admit(ctx context.Context, a admission.Attributes, _ admission.ObjectInterfaces) error {
-	// we are only interested in pizzas
 	if a.GetKind().GroupKind() != restaurant.Kind("Foo") {
 		return nil
 	}
@@ -42,11 +41,12 @@ func (d *FooBarPlugin) Admit(ctx context.Context, a admission.Attributes, _ admi
 
 	obj := a.GetObject()
 	foo := obj.(*restaurant.Foo)
+
 	for _, top := range foo.Spec.Bar {
 		if _, err := d.barLister.Get(top.Name); err != nil && errors.IsNotFound(err) {
 			return admission.NewForbidden(
 				a,
-				fmt.Errorf("unknown topping: %s", top.Name),
+				fmt.Errorf("unknown bar: %s", top.Name),
 			)
 		}
 	}

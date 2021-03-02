@@ -1,0 +1,6 @@
+apiVersion: restaurant.programming-kubernetes.info/v1alpha1
+kind: Bar
+metadata:
+  name: Hommer
+spec:
+  cost: 1.0
