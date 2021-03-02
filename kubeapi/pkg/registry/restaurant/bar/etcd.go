@@ -14,8 +14,10 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 	strategy := NewStrategy(scheme)
 
 	store := &genericregistry.Store{
-		NewFunc:                  func() runtime.Object { return &restaurant.Foo{} },
-		NewListFunc:              func() runtime.Object { return &restaurant.FooList{} },
+		// Here is where you set that the bars objets are of kind Bar
+		NewFunc:     func() runtime.Object { return &restaurant.Bar{} },
+		NewListFunc: func() runtime.Object { return &restaurant.BarList{} },
+
 		PredicateFunc:            MatchBar,
 		DefaultQualifiedResource: restaurant.Resource("bars"),
 

@@ -21,7 +21,7 @@ cmd0="./generate-groups.sh all \
     "$PROJECT_MODULE/pkg/apis" \
     $CUSTOM_RESOURCE_NAME:$CUSTOM_RESOURCE_VERSION"
 
-cmd1="./generate-internal-groups.sh "deepcopy,defaulter,conversion" \
+cmd1="./generate-internal-groups.sh "deepcopy,defaulter,conversion,informer,listers,client" \
     "$PROJECT_MODULE/pkg/generated" \
     "$PROJECT_MODULE/pkg/apis" \
     "$PROJECT_MODULE/pkg/apis" \
@@ -30,11 +30,11 @@ cmd1="./generate-internal-groups.sh "deepcopy,defaulter,conversion" \
 echo "Generating client codes..."
 
 docker run --rm \
-           -v "${REPO_DIR}:/go/src/${PROJECT_MODULE}" \
+           -v "${REPO_DIR}:/go/src/github.com/marcos30004347/kubeapi" \
            "${IMAGE_NAME}" $cmd0
 
 docker run --rm \
-           -v "${REPO_DIR}:/go/src/${PROJECT_MODULE}" \
+           -v "${REPO_DIR}:/go/src/github.com/marcos30004347/kubeapi" \
            "${IMAGE_NAME}" $cmd1
 
-sudo chown $USER:$USER -R $REPO_DIR/pkg
+# sudo chown $USER:$USER -R $REPO_DIR/pkg

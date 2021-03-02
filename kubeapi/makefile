@@ -13,6 +13,6 @@ run:
 
 
 deploy: build
-	eval $(minikube docker-env)
+	# eval $(minikube docker-env)
 	kubectl apply -f ./k8s/ns.yaml
 	kubectl apply -f ./k8s/

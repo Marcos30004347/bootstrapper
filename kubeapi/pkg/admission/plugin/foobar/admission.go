@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apiserver/pkg/admission"
 
 	"github.com/marcos30004347/kubeapi/pkg/admission/custominitializer"
@@ -40,13 +41,25 @@ func (d *FooBarPlugin) Admit(ctx context.Context, a admission.Attributes, _ admi
 	}
 
 	obj := a.GetObject()
+
 	foo := obj.(*restaurant.Foo)
 
-	for _, top := range foo.Spec.Bar {
-		if _, err := d.barLister.Get(top.Name); err != nil && errors.IsNotFound(err) {
-			return admission.NewForbidden(
-				a,
-				fmt.Errorf("unknown bar: %s", top.Name),
+	everything, err := d.barLister.List(labels.Everything())
+
+	if err != nil {
+		errors.NewForbidden(
+			a.GetResource().GroupResource(),
+			a.GetName(),
+			fmt.Errorf("asdasdasdasasa bar: %s %#v", everything[0].Name, obj),
+		)
+	}
+
+	for _, bar := range foo.Spec.Bar {
+		if b, err := d.barLister.Get(bar.Name); err != nil && errors.IsNotFound(err) {
+			return errors.NewForbidden(
+				a.GetResource().GroupResource(),
+				a.GetName(),
+				fmt.Errorf("unknown bar: %s    =============== %#v  ================= %#v", bar.Name, everything[0], b),
 			)
 		}
 	}

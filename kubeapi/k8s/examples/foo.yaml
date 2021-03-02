@@ -1,7 +1,7 @@
 apiVersion: restaurant.programming-kubernetes.info/v1alpha1
 kind: Foo
 metadata:
-  name: Hommer
+  name: Simpsons
 spec:
   bar:
-    - foo0
+    - Hommer

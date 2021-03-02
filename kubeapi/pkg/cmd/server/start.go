@@ -17,10 +17,8 @@ import (
 	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant/v1alpha1"
 	"github.com/marcos30004347/kubeapi/pkg/apiserver"
 
-	// It’s called a client set because it contains multiple clients for all native Kubernetes resources.
 	clientset "github.com/marcos30004347/kubeapi/pkg/generated/clientset/versioned"
 
-	//  “Client Sets” includes the Watch verb, which offers an event interface that reacts to changes (adds, removes, updates) of objects. Informers give a higher-level programming interface for the most common use case for watches
 	informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
 
 	"k8s.io/apiserver/pkg/admission"
