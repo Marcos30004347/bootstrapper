@@ -11,6 +11,7 @@ import (
 
 	"github.com/marcos30004347/kubeapi/pkg/admission/custominitializer"
 	"github.com/marcos30004347/kubeapi/pkg/apis/restaurant"
+
 	informers "github.com/marcos30004347/kubeapi/pkg/generated/informers/externalversions"
 	listers "github.com/marcos30004347/kubeapi/pkg/generated/listers/restaurant/v1alpha1"
 )
@@ -55,7 +56,7 @@ func (d *FooBarPlugin) Admit(ctx context.Context, a admission.Attributes, _ admi
 	}
 
 	for _, bar := range foo.Spec.Bar {
-		if b, err := d.barLister.Get(bar.Name); err != nil && errors.IsNotFound(err) {
+		if b, err := d.barLister.Get("default/" + bar.Name); err != nil && errors.IsNotFound(err) {
 			return errors.NewForbidden(
 				a.GetResource().GroupResource(),
 				a.GetName(),
@@ -74,7 +75,7 @@ func (d *FooBarPlugin) SetRestaurantInformerFactory(f informers.SharedInformerFa
 	d.SetReadyFunc(f.Restaurant().V1alpha1().Bars().Informer().HasSynced)
 }
 
-// ValidaValidateInitializationte checks whether the plugin was correctly initialized.
+// ValidateInitialization checks whether the plugin was correctly initialized.
 func (d *FooBarPlugin) ValidateInitialization() error {
 	if d.barLister == nil {
 		return fmt.Errorf("missing policy lister")
